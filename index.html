@@ -114,6 +114,59 @@
     border-color:var(--green);
   }
 
+  .subcat-bar{
+    display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin:-8px 0 16px;
+    scrollbar-width:none;
+  }
+  .subcat-bar::-webkit-scrollbar{display:none;}
+  .subcat-chip{
+    flex:0 0 auto;
+    padding:6px 14px;
+    border-radius:999px;
+    background:var(--cream);
+    border:1px solid var(--line);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    color:var(--ink);
+  }
+  .subcat-chip.active{
+    background:var(--terra);
+    color:var(--white);
+    border-color:var(--terra);
+  }
+
+  .cat-picker-btn{
+    width:100%;
+    text-align:right;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--white);
+    font-family:'Cairo',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .cat-picker-btn.filled{
+    color:var(--green);
+    font-weight:700;
+  }
+
+  #subcatList .subcat-row{
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  #subcatList .subcat-row:active{background:var(--cream);}
+  #subcatList .subcat-row .arrow{color:#9a9182;font-size:14px;}
+
   /* ===== Listings grid ===== */
   .grid{
     display:grid;
@@ -371,11 +424,22 @@
     <div class="chip" data-cat="سيارات">سيارات</div>
     <div class="chip" data-cat="أخرى">أخرى</div>
   </div>
+  <div class="subcat-bar" id="subcatBar" style="display:none;"></div>
 
   <div id="listingsArea">
     <div class="loading-spin"></div>
   </div>
 </main>
+
+<!-- ===== Subcategory Picker Sheet (للفلتر وللنشر، معاً) ===== -->
+<div class="overlay" id="subcatOverlay">
+  <div class="sheet">
+    <button type="button" class="close-x" data-close="subcatOverlay">✕</button>
+    <div class="sheet-handle"></div>
+    <h2 id="subcatTitle">اختار الفئة الفرعية</h2>
+    <div id="subcatList"></div>
+  </div>
+</div>
 
 <button type="button" class="fab" id="openAddBtn">＋ نشر إعلان</button>
 
@@ -430,14 +494,9 @@
     </div>
     <div class="field">
       <label>الفئة</label>
-      <select id="adCategory">
-        <option>أثاث</option>
-        <option>أجهزة</option>
-        <option>ملابس</option>
-        <option>موبايلات</option>
-        <option>سيارات</option>
-        <option>أخرى</option>
-      </select>
+      <button type="button" class="cat-picker-btn" id="adCategoryBtn">اختار الفئة</button>
+      <input type="hidden" id="adCategory">
+      <input type="hidden" id="adSubcategory">
     </div>
     <div class="field">
       <label>المنطقة</label>
@@ -493,6 +552,16 @@ const db = getFirestore(app);
 let currentUser = null;
 let allListings = [];
 let activeCategory = "الكل";
+let activeSubcategory = null; // null يعني كل الفئة الرئيسية بدون تحديد فرع
+
+const CATEGORY_TREE = {
+  "ملابس": ["ملابس رجالي", "ملابس حريمي", "ملابس أطفال", "أحذية", "حقائب", "إكسسوارات"],
+  "موبايلات": ["موبايلات", "أجهزة لوحية (تابلت)", "ساعات ذكية", "إكسسوارات موبايل", "سماعات"],
+  "أجهزة": ["أجهزة كهربائية منزلية", "أجهزة مطبخ", "كمبيوتر ولابتوب", "تلفزيونات وشاشات", "أجهزة صوت"],
+  "أثاث": ["غرف نوم", "صالونات وكنب", "طاولات وكراسي", "مطابخ", "ديكور ومفروشات"],
+  "سيارات": ["سيارات للبيع", "قطع غيار", "إكسسوارات سيارات", "دراجات نارية"],
+  "أخرى": []
+};
 
 // ---------- Helpers ----------
 function show(id){ document.getElementById(id).classList.add('show'); }
@@ -663,7 +732,9 @@ function openAddSheet(item){
   document.getElementById('publishBtn').textContent = item ? 'حفظ التعديلات' : 'نشر الإعلان';
   document.getElementById('adTitle').value = item ? item.title : '';
   document.getElementById('adPrice').value = item ? item.price : '';
-  document.getElementById('adCategory').value = item ? item.category : 'أثاث';
+  document.getElementById('adCategory').value = item ? item.category : '';
+  document.getElementById('adSubcategory').value = item ? (item.subcategory || '') : '';
+  updateCatBtnLabel();
   document.getElementById('adRegion').value = item ? item.region : '';
   document.getElementById('adDesc').value = item ? (item.desc||'') : '';
   const preview = document.getElementById('imgPreview');
@@ -679,6 +750,80 @@ function openAddSheet(item){
   show('addOverlay');
 }
 
+function updateCatBtnLabel(){
+  const btn = document.getElementById('adCategoryBtn');
+  const cat = document.getElementById('adCategory').value;
+  const sub = document.getElementById('adSubcategory').value;
+  if(!cat){
+    btn.textContent = 'اختار الفئة';
+    btn.classList.remove('filled');
+  } else {
+    btn.textContent = sub ? `${cat} ‹ ${sub}` : cat;
+    btn.classList.add('filled');
+  }
+}
+
+// ---------- Category picker (drill-down: رئيسية ثم فرعية) ----------
+const MAIN_CATEGORIES = ["ملابس", "موبايلات", "أجهزة", "أثاث", "سيارات", "أخرى"];
+
+document.getElementById('adCategoryBtn').addEventListener('click', ()=>{
+  openSubcatPicker('main');
+});
+
+function openSubcatPicker(level, mainCat){
+  const titleEl = document.getElementById('subcatTitle');
+  const listEl = document.getElementById('subcatList');
+  listEl.innerHTML = '';
+
+  if(level === 'main'){
+    titleEl.textContent = 'اختار الفئة الرئيسية';
+    MAIN_CATEGORIES.forEach(cat=>{
+      const hasSubs = (CATEGORY_TREE[cat] || []).length > 0;
+      const row = document.createElement('div');
+      row.className = 'subcat-row';
+      row.innerHTML = `<span>${escapeHtml(cat)}</span>${hasSubs ? '<span class="arrow">‹</span>' : ''}`;
+      row.addEventListener('click', ()=>{
+        if(hasSubs){
+          openSubcatPicker('sub', cat);
+        } else {
+          document.getElementById('adCategory').value = cat;
+          document.getElementById('adSubcategory').value = '';
+          updateCatBtnLabel();
+          hide('subcatOverlay');
+        }
+      });
+      listEl.appendChild(row);
+    });
+  } else {
+    titleEl.textContent = mainCat;
+    // خيار "كل " + الفئة الرئيسية، بدون فرع محدد
+    const allRow = document.createElement('div');
+    allRow.className = 'subcat-row';
+    allRow.innerHTML = `<span>كل ${escapeHtml(mainCat)}</span>`;
+    allRow.addEventListener('click', ()=>{
+      document.getElementById('adCategory').value = mainCat;
+      document.getElementById('adSubcategory').value = '';
+      updateCatBtnLabel();
+      hide('subcatOverlay');
+    });
+    listEl.appendChild(allRow);
+
+    (CATEGORY_TREE[mainCat] || []).forEach(sub=>{
+      const row = document.createElement('div');
+      row.className = 'subcat-row';
+      row.innerHTML = `<span>${escapeHtml(sub)}</span>`;
+      row.addEventListener('click', ()=>{
+        document.getElementById('adCategory').value = mainCat;
+        document.getElementById('adSubcategory').value = sub;
+        updateCatBtnLabel();
+        hide('subcatOverlay');
+      });
+      listEl.appendChild(row);
+    });
+  }
+  show('subcatOverlay');
+}
+
 document.getElementById('publishBtn').addEventListener('click', async ()=>{
   if(!currentUser){
     toast('لازم تسجل دخول أول');
@@ -688,6 +833,7 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
   const title = document.getElementById('adTitle').value.trim();
   const price = document.getElementById('adPrice').value.trim();
   const category = document.getElementById('adCategory').value;
+  const subcategory = document.getElementById('adSubcategory').value;
   const region = document.getElementById('adRegion').value.trim();
   const desc = document.getElementById('adDesc').value.trim();
   const errEl = document.getElementById('addError');
@@ -695,6 +841,11 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
 
   if(!title || !price || !region){
     errEl.textContent = 'عبي العنوان والسعر والمنطقة على الأقل';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(!category){
+    errEl.textContent = 'لازم تختار فئة للإعلان';
     errEl.style.display = 'block';
     return;
   }
@@ -715,13 +866,13 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
         return;
       }
       await updateDoc(doc(db, 'listings', editingId), {
-        title, price: Number(price), category, region, desc,
+        title, price: Number(price), category, subcategory, region, desc,
         imageUrl: selectedImageBase64 || ''
       });
       toast('تم حفظ التعديلات ✅');
     } else {
       await addDoc(collection(db, 'listings'), {
-        title, price: Number(price), category, region, desc,
+        title, price: Number(price), category, subcategory, region, desc,
         imageUrl: selectedImageBase64 || '',
         sellerId: currentUser.uid,
         sellerName: currentUser.displayName || 'مستخدم',
@@ -734,6 +885,8 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
     document.getElementById('adPrice').value='';
     document.getElementById('adRegion').value='';
     document.getElementById('adDesc').value='';
+    document.getElementById('adCategory').value='';
+    document.getElementById('adSubcategory').value='';
     document.getElementById('imgPreview').style.display='none';
     selectedImageBase64 = '';
     editingId = null;
@@ -774,8 +927,32 @@ document.getElementById('filterChips').addEventListener('click', (e)=>{
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   e.target.classList.add('active');
   activeCategory = e.target.dataset.cat;
+  activeSubcategory = null;
+  renderSubcatBar();
   renderListings();
 });
+
+function renderSubcatBar(){
+  const bar = document.getElementById('subcatBar');
+  const subs = CATEGORY_TREE[activeCategory] || [];
+  if(activeCategory === 'الكل' || subs.length === 0){
+    bar.style.display = 'none';
+    bar.innerHTML = '';
+    return;
+  }
+  bar.style.display = 'flex';
+  bar.innerHTML = `<div class="subcat-chip active" data-sub="">الكل</div>` +
+    subs.map(s=>`<div class="subcat-chip" data-sub="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
+}
+
+document.getElementById('subcatBar').addEventListener('click', (e)=>{
+  if(!e.target.classList.contains('subcat-chip')) return;
+  document.querySelectorAll('.subcat-chip').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active');
+  activeSubcategory = e.target.dataset.sub || null;
+  renderListings();
+});
+
 document.getElementById('searchInput').addEventListener('input', renderListings);
 
 // ---------- Load & render listings ----------
@@ -813,6 +990,9 @@ function renderListings(){
   let items = allListings;
   if(activeCategory !== 'الكل'){
     items = items.filter(i=>i.category === activeCategory);
+  }
+  if(activeSubcategory){
+    items = items.filter(i=>i.subcategory === activeSubcategory);
   }
   if(term){
     items = items.filter(i=> (i.title||'').toLowerCase().includes(term) || (i.region||'').toLowerCase().includes(term));
@@ -884,7 +1064,7 @@ function openDetail(id){
     <div class="detail-title">${escapeHtml(item.title)}</div>
     <div class="detail-meta">
       <span class="badge">📍 ${escapeHtml(item.region||'')}</span>
-      <span class="badge">${escapeHtml(item.category||'')}</span>
+      <span class="badge">${escapeHtml(item.category||'')}${item.subcategory ? ' ‹ '+escapeHtml(item.subcategory) : ''}</span>
       <span class="badge">${timeAgo(item.createdAt)}</span>
     </div>
     ${item.desc ? `<p style="line-height:1.6;color:#555;">${escapeHtml(item.desc)}</p>` : ''}
