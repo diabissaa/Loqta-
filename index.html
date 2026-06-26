@@ -170,6 +170,24 @@
   }
   .empty .big{font-size:40px;margin-bottom:10px;}
 
+  .my-card .card-body{cursor:default;}
+  .my-card-actions{display:flex;gap:6px;margin-top:8px;}
+  .mini-btn{
+    flex:1;
+    border:1px solid var(--line);
+    background:var(--white);
+    border-radius:8px;
+    padding:7px 4px;
+    font-size:12px;
+    font-weight:600;
+    font-family:'Cairo',sans-serif;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .mini-btn.edit-btn:active{background:var(--cream);}
+  .mini-btn.del-btn{color:#B23A2F;border-color:#e6c9c3;}
+  .mini-btn.del-btn:active{background:#fbeceb;}
+
   /* ===== Floating add button ===== */
   .fab{
     position:fixed;
@@ -393,7 +411,7 @@
   <div class="sheet">
     <button type="button" class="close-x" data-close="addOverlay">✕</button>
     <div class="sheet-handle"></div>
-    <h2>نشر إعلان جديد</h2>
+    <h2 id="addSheetTitle">نشر إعلان جديد</h2>
     <div class="field">
       <label>صورة القطعة</label>
       <img class="img-preview" id="imgPreview">
@@ -455,7 +473,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, getDocs, query, orderBy,
-  doc, getDoc, serverTimestamp
+  doc, getDoc, updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -538,34 +556,41 @@ document.getElementById('authSubmit').addEventListener('click', async (e)=>{
   const debugMode = authMode;
 
   if(!email || !pass){
-    alert('[تشخيص] وضع: '+debugMode+' | الإيميل أو كلمة السر فاضية');
+    errEl.textContent = 'عبي الإيميل وكلمة السر';
+    errEl.style.display = 'block';
     return;
   }
+  const submitBtn = document.getElementById('authSubmit');
+  submitBtn.disabled = true;
   try{
     if(debugMode === 'signup'){
       if(!name){
-        alert('[تشخيص] وضع: '+debugMode+' | الاسم فاضي');
+        errEl.textContent = 'عبي اسمك';
+        errEl.style.display = 'block';
+        submitBtn.disabled = false;
         return;
       }
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      alert('✅ نجح إنشاء الحساب!\nالإيميل: '+email+'\nUID: '+cred.user.uid);
       try{
         await updateProfile(cred.user, { displayName: name });
       }catch(profileErr){
-        alert('⚠️ الحساب انعمل بس فشل حفظ الاسم: '+profileErr.message);
+        console.error(profileErr);
       }
+      toast('تم إنشاء حسابك ✅');
     } else {
-      const cred = await signInWithEmailAndPassword(auth, email, pass);
-      alert('✅ نجح تسجيل الدخول!\nالإيميل: '+email+'\nUID: '+cred.user.uid);
+      await signInWithEmailAndPassword(auth, email, pass);
+      toast('تم تسجيل الدخول ✅');
     }
     hide('authOverlay');
     document.getElementById('authEmail').value='';
     document.getElementById('authPass').value='';
     document.getElementById('authName').value='';
   }catch(e){
-    alert('❌ [تشخيص] وضع: '+debugMode+'\nكود الخطأ: '+e.code+'\nرسالة: '+e.message);
-    errEl.textContent = '[وضع:'+debugMode+' | كود:'+e.code+'] '+friendlyAuthError(e.code);
+    errEl.textContent = friendlyAuthError(e.code);
     errEl.style.display = 'block';
+    console.error(e);
+  }finally{
+    submitBtn.disabled = false;
   }
 });
 
@@ -620,17 +645,46 @@ document.getElementById('imgInput').addEventListener('change', (e)=>{
   reader.readAsDataURL(file);
 });
 
-// ---------- Add listing ----------
+// ---------- Add / Edit listing ----------
+let editingId = null; // null = نشر جديد، غير ذلك = تعديل إعلان موجود
+
 document.getElementById('openAddBtn').addEventListener('click', ()=>{
   if(!currentUser){
     toast('لازم تسجل دخول أول');
     show('authOverlay');
     return;
   }
-  show('addOverlay');
+  openAddSheet(null);
 });
 
+function openAddSheet(item){
+  editingId = item ? item.id : null;
+  document.getElementById('addSheetTitle').textContent = item ? 'تعديل الإعلان' : 'نشر إعلان جديد';
+  document.getElementById('publishBtn').textContent = item ? 'حفظ التعديلات' : 'نشر الإعلان';
+  document.getElementById('adTitle').value = item ? item.title : '';
+  document.getElementById('adPrice').value = item ? item.price : '';
+  document.getElementById('adCategory').value = item ? item.category : 'أثاث';
+  document.getElementById('adRegion').value = item ? item.region : '';
+  document.getElementById('adDesc').value = item ? (item.desc||'') : '';
+  const preview = document.getElementById('imgPreview');
+  if(item && item.imageUrl){
+    preview.src = item.imageUrl;
+    preview.style.display = 'block';
+    selectedImageBase64 = item.imageUrl;
+  } else {
+    preview.style.display = 'none';
+    selectedImageBase64 = '';
+  }
+  document.getElementById('addError').style.display = 'none';
+  show('addOverlay');
+}
+
 document.getElementById('publishBtn').addEventListener('click', async ()=>{
+  if(!currentUser){
+    toast('لازم تسجل دخول أول');
+    show('authOverlay');
+    return;
+  }
   const title = document.getElementById('adTitle').value.trim();
   const price = document.getElementById('adPrice').value.trim();
   const category = document.getElementById('adCategory').value;
@@ -647,17 +701,34 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
 
   const btn = document.getElementById('publishBtn');
   btn.disabled = true;
-  btn.textContent = 'عم ننشر...';
+  btn.textContent = editingId ? 'عم نحفظ...' : 'عم ننشر...';
 
   try{
-    await addDoc(collection(db, 'listings'), {
-      title, price: Number(price), category, region, desc,
-      imageUrl: selectedImageBase64 || '',
-      sellerId: currentUser.uid,
-      sellerName: currentUser.displayName || 'مستخدم',
-      createdAt: Date.now()
-    });
-    toast('تم نشر إعلانك ✅');
+    if(editingId){
+      // تحقق إنه المستخدم هو صاحب الإعلان قبل التعديل
+      const existing = allListings.find(i=>i.id===editingId);
+      if(!existing || existing.sellerId !== currentUser.uid){
+        errEl.textContent = 'ما عندك صلاحية تعدل هاد الإعلان';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'حفظ التعديلات';
+        return;
+      }
+      await updateDoc(doc(db, 'listings', editingId), {
+        title, price: Number(price), category, region, desc,
+        imageUrl: selectedImageBase64 || ''
+      });
+      toast('تم حفظ التعديلات ✅');
+    } else {
+      await addDoc(collection(db, 'listings'), {
+        title, price: Number(price), category, region, desc,
+        imageUrl: selectedImageBase64 || '',
+        sellerId: currentUser.uid,
+        sellerName: currentUser.displayName || 'مستخدم',
+        createdAt: Date.now()
+      });
+      toast('تم نشر إعلانك ✅');
+    }
     hide('addOverlay');
     document.getElementById('adTitle').value='';
     document.getElementById('adPrice').value='';
@@ -665,16 +736,37 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
     document.getElementById('adDesc').value='';
     document.getElementById('imgPreview').style.display='none';
     selectedImageBase64 = '';
+    editingId = null;
     loadListings();
   }catch(e){
-    errEl.textContent = 'صار خطأ بالنشر، جرب مرة تانية';
+    errEl.textContent = 'صار خطأ، جرب مرة تانية';
     errEl.style.display = 'block';
     console.error(e);
   }finally{
     btn.disabled = false;
-    btn.textContent = 'نشر الإعلان';
+    btn.textContent = editingId ? 'حفظ التعديلات' : 'نشر الإعلان';
   }
 });
+
+// ---------- Delete listing ----------
+async function deleteListing(id){
+  const item = allListings.find(i=>i.id===id);
+  if(!item) return;
+  if(!currentUser || item.sellerId !== currentUser.uid){
+    toast('ما عندك صلاحية تحذف هاد الإعلان');
+    return;
+  }
+  if(!confirm('متأكد بدك تحذف هاد الإعلان؟ ما رح تقدر ترجعه')) return;
+  try{
+    await deleteDoc(doc(db, 'listings', id));
+    toast('تم حذف الإعلان 🗑️');
+    hide('profileOverlay');
+    loadListings();
+  }catch(e){
+    toast('صار خطأ بالحذف، جرب مرة تانية');
+    console.error(e);
+  }
+}
 
 // ---------- Filters ----------
 document.getElementById('filterChips').addEventListener('click', (e)=>{
@@ -689,16 +781,30 @@ document.getElementById('searchInput').addEventListener('input', renderListings)
 // ---------- Load & render listings ----------
 async function loadListings(){
   document.getElementById('listingsArea').innerHTML = '<div class="loading-spin"></div>';
+  const timeoutMs = 12000;
+  let timedOut = false;
+  const timeoutId = setTimeout(()=>{
+    timedOut = true;
+    document.getElementById('listingsArea').innerHTML =
+      '<div class="empty"><div class="big">⚠️</div>الاتصال طويل أكتر من العادة<br>تأكد من الإنترنت وجرب تحديث الصفحة</div>';
+  }, timeoutMs);
+
   try{
     const q = query(collection(db, 'listings'), orderBy('createdAt','desc'));
     const snap = await getDocs(q);
+    clearTimeout(timeoutId);
+    if(timedOut) return; // المستخدم شاف رسالة المهلة، ما نعيد الكتابة فوقها بهدوء
     allListings = snap.docs.map(d=>({id:d.id, ...d.data()}));
     renderListings();
   }catch(e){
-    alert('❌ [تشخيص تحميل الإعلانات]\nكود: '+e.code+'\nرسالة: '+e.message);
-    document.getElementById('listingsArea').innerHTML =
-      '<div class="empty"><div class="big">⚠️</div>صار خطأ بتحميل الإعلانات<br><small>'+e.code+'</small></div>';
+    clearTimeout(timeoutId);
     console.error(e);
+    const code = e && e.code ? e.code : '';
+    let msg = 'صار خطأ بتحميل الإعلانات';
+    if(code === 'permission-denied') msg = 'صلاحيات Firestore مرفوضة، راجع Security Rules';
+    else if(code === 'unavailable') msg = 'ما في اتصال بالسيرفر، تأكد من الإنترنت';
+    document.getElementById('listingsArea').innerHTML =
+      `<div class="empty"><div class="big">⚠️</div>${msg}${code ? '<br><span style="font-size:11px;opacity:.7;">كود: '+code+'</span>' : ''}</div>`;
   }
 }
 
@@ -733,6 +839,25 @@ function cardHtml(item){
         <div class="card-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
         <div class="card-title">${escapeHtml(item.title)}</div>
         <div class="card-meta">📍 ${escapeHtml(item.region||'')}</div>
+      </div>
+    </div>`;
+}
+
+function myCardHtml(item){
+  const img = item.imageUrl
+    ? `<img src="${item.imageUrl}" loading="lazy">`
+    : `<div class="ph">📦</div>`;
+  return `
+    <div class="card my-card" data-id="${item.id}">
+      ${img}
+      <div class="card-body">
+        <div class="card-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
+        <div class="card-title">${escapeHtml(item.title)}</div>
+        <div class="card-meta">📍 ${escapeHtml(item.region||'')}</div>
+        <div class="my-card-actions">
+          <button type="button" class="mini-btn edit-btn" data-id="${item.id}">✏️ تعديل</button>
+          <button type="button" class="mini-btn del-btn" data-id="${item.id}">🗑️ حذف</button>
+        </div>
       </div>
     </div>`;
 }
@@ -781,7 +906,7 @@ function openDetail(id){
 
 // ---------- Profile sheet ----------
 function openProfile(){
-  const myListings = allListings.filter(i=>i.sellerId === currentUser.uid);
+  const myListings = allListings.filter(i=>currentUser && i.sellerId === currentUser.uid);
   document.getElementById('profileContent').innerHTML = `
     <button type="button" class="close-x" data-close="profileOverlay">✕</button>
     <div class="sheet-handle"></div>
@@ -793,7 +918,7 @@ function openProfile(){
       </div>
     </div>
     <h2 style="font-size:16px;">إعلاناتي (${myListings.length})</h2>
-    ${myListings.length ? `<div class="grid">${myListings.map(cardHtml).join('')}</div>` : '<div class="empty">لسا ما نشرت إعلانات</div>'}
+    ${myListings.length ? `<div class="grid">${myListings.map(myCardHtml).join('')}</div>` : '<div class="empty">لسا ما نشرت إعلانات</div>'}
     <button type="button" class="btn btn-ghost" id="logoutBtn">تسجيل خروج</button>
   `;
   document.querySelector('#profileOverlay .close-x').addEventListener('click', ()=>hide('profileOverlay'));
@@ -802,8 +927,18 @@ function openProfile(){
     hide('profileOverlay');
     toast('تم تسجيل الخروج');
   });
-  document.querySelectorAll('#profileContent .card').forEach(c=>{
-    c.addEventListener('click', ()=>{ hide('profileOverlay'); openDetail(c.dataset.id); });
+  document.querySelectorAll('#profileContent .edit-btn').forEach(b=>{
+    b.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const item = allListings.find(i=>i.id===b.dataset.id);
+      if(item){ hide('profileOverlay'); openAddSheet(item); }
+    });
+  });
+  document.querySelectorAll('#profileContent .del-btn').forEach(b=>{
+    b.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      deleteListing(b.dataset.id);
+    });
   });
   show('profileOverlay');
 }
