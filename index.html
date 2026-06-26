@@ -25,12 +25,36 @@
     color:var(--ink);
     min-height:100vh;
     background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%233D5A45' stroke-width='1' opacity='0.05'%3E%3Cpath d='M30 2 L42 14 L42 30 L58 30 L58 42 L46 42 L46 58 L30 58 L30 46 L14 46 L14 58 L2 58 L2 42 L14 42 L14 30 L2 30 L2 14 L14 14 L14 2 Z'/%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3C/g%3E%3C/svg%3E");
-    background-size:60px 60px;
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%233D5A45' stroke-width='1' opacity='0.025'%3E%3Cpath d='M30 2 L42 14 L42 30 L58 30 L58 42 L46 42 L46 58 L30 58 L30 46 L14 46 L14 58 L2 58 L2 42 L14 42 L14 30 L2 30 L2 14 L14 14 L14 2 Z'/%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:80px 80px;
   }
   h1,h2,h3,.brand{font-family:'Tajawal',sans-serif;}
 
-  /* ===== Header ===== */
+  /* ===== Hero (هيدر + بحث + سلوجان) ===== */
+  .hero{
+    background:var(--green);
+    padding:16px 16px 22px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  .hero-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .hero-slogan{
+    color:rgba(255,255,255,.85);
+    font-size:13px;
+    margin:-6px 0 14px;
+  }
+  .hero .search-bar input{
+    background:var(--white);
+  }
+
+  /* ===== Header (legacy، يبقى للتوافق) ===== */
   header{
     background:var(--green);
     color:var(--white);
@@ -91,6 +115,62 @@
     background:var(--white);
   }
   .search-bar input:focus{outline:2px solid var(--terra);}
+  .filter-btn{
+    position:relative;
+    flex:0 0 auto;
+    width:48px;height:48px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--white);
+    font-size:19px;
+    cursor:pointer;
+  }
+  .filter-btn.has-filters{
+    border-color:var(--terra);
+    background:#fff3ee;
+  }
+  .filter-btn .dot{
+    position:absolute;top:-4px;left:-4px;
+    width:10px;height:10px;border-radius:50%;
+    background:var(--terra);
+  }
+  .search-suggest{
+    display:none;
+    position:absolute;
+    top:54px;right:0;left:58px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+    z-index:30;
+    max-height:280px;
+    overflow-y:auto;
+  }
+  .search-suggest.show{display:block;}
+  .search-suggest .sg-section-title{
+    padding:10px 14px 4px;
+    font-size:12px;
+    color:#9a9182;
+    font-weight:700;
+  }
+  .search-suggest .sg-row{
+    padding:10px 14px;
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .search-suggest .sg-row:active{background:var(--cream);}
+  .search-suggest .sg-clear{
+    text-align:center;
+    padding:10px;
+    font-size:13px;
+    color:var(--terra);
+    font-weight:700;
+    cursor:pointer;
+    border-top:1px solid var(--line);
+  }
   .filters{
     display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;
     scrollbar-width:none;
@@ -112,6 +192,38 @@
     background:var(--green);
     color:var(--white);
     border-color:var(--green);
+  }
+
+  /* ===== Category circles (زي Vinted) ===== */
+  .cat-circles{
+    display:flex;gap:14px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:4px;
+    scrollbar-width:none;
+  }
+  .cat-circles::-webkit-scrollbar{display:none;}
+  .cat-circle-item{
+    flex:0 0 auto;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    cursor:pointer;
+    width:64px;
+  }
+  .cat-circle-icon{
+    width:56px;height:56px;
+    border-radius:50%;
+    background:var(--white);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;
+  }
+  .cat-circle-item.active .cat-circle-icon{
+    background:var(--green);
+    border-color:var(--green);
+  }
+  .cat-circle-item.active .cat-circle-label{color:var(--green);font-weight:700;}
+  .cat-circle-label{
+    font-size:12px;
+    color:var(--ink);
+    text-align:center;
+    white-space:nowrap;
   }
 
   .subcat-bar{
@@ -171,7 +283,7 @@
   .grid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:12px;
+    gap:10px;
   }
   .card{
     background:var(--white);
@@ -180,6 +292,7 @@
     border:1px solid var(--line);
     cursor:pointer;
     transition:transform .12s;
+    position:relative;
   }
   .card:active{transform:scale(.97);}
   .card img,.card .ph{
@@ -191,11 +304,22 @@
     font-size:30px;
     color:#b8ac92;
   }
+  .card-badge{
+    position:absolute;
+    top:8px;right:8px;
+    background:rgba(61,90,69,.92);
+    color:var(--white);
+    font-size:11px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:999px;
+  }
   .card-body{padding:10px 12px 12px;}
   .card-price{
     font-family:'Tajawal',sans-serif;
     font-weight:900;
     font-size:17px;
+    color:var(--green-dark);
     color:var(--terra-dark);
   }
   .card-title{
@@ -216,12 +340,66 @@
     gap:4px;
   }
 
+  /* ===== Horizontal sections (الأكثر مشاهدة / وصل حديثاً) ===== */
+  .h-section{margin-bottom:18px;}
+  .h-section-title{
+    display:flex;align-items:center;gap:6px;
+    font-family:'Tajawal',sans-serif;
+    font-weight:900;
+    font-size:16px;
+    margin-bottom:10px;
+  }
+  .h-scroll{
+    display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;
+    scrollbar-width:none;
+  }
+  .h-scroll::-webkit-scrollbar{display:none;}
+  .h-card{
+    flex:0 0 auto;
+    width:140px;
+    background:var(--white);
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    cursor:pointer;
+  }
+  .h-card img,.h-card .ph{
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    background:linear-gradient(135deg,#e8e0d0,#dfd5c0);
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;
+    color:#b8ac92;
+  }
+  .h-card-body{padding:8px 10px 10px;}
+  .h-card-price{
+    font-family:'Tajawal',sans-serif;
+    font-weight:900;
+    font-size:14px;
+    color:var(--green-dark);
+  }
+  .h-card-title{
+    font-size:12px;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-top:2px;
+  }
+
   .empty{
     text-align:center;
     padding:60px 20px;
     color:#9a9182;
   }
   .empty .big{font-size:40px;margin-bottom:10px;}
+  .no-results-suggest{
+    margin-top:18px;
+    padding:0 20px;
+    text-align:center;
+  }
+  .no-results-suggest .subcat-chip{display:inline-block;margin:3px;}
 
   .my-card .card-body{cursor:default;}
   .my-card-actions{display:flex;gap:6px;margin-top:8px;}
@@ -244,7 +422,7 @@
   /* ===== Floating add button ===== */
   .fab{
     position:fixed;
-    bottom:22px;
+    bottom:78px;
     left:50%;
     transform:translateX(-50%);
     background:var(--terra);
@@ -263,6 +441,29 @@
     z-index:40;
   }
   .fab:active{background:var(--terra-dark);}
+
+  /* ===== Bottom navigation bar ===== */
+  .bottom-nav{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:var(--white);
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-around;
+    padding:6px 0 max(6px, env(safe-area-inset-bottom));
+    z-index:45;
+  }
+  .bottom-nav-item{
+    flex:1;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:6px 2px;
+    cursor:pointer;
+    color:#9a9182;
+    font-size:11px;
+  }
+  .bottom-nav-item .bn-icon{font-size:21px;line-height:1;}
+  .bottom-nav-item.active{color:var(--green);}
+  body{padding-bottom:64px;}
 
   /* ===== Modal sheets ===== */
   .overlay{
@@ -404,18 +605,60 @@
 </head>
 <body>
 
-<header>
+<header style="display:none;">
   <div class="brand">لقطة<span>.</span></div>
   <div class="header-actions">
     <button type="button" class="icon-btn" id="profileBtn" title="حسابي">👤</button>
   </div></header>
+
+<div class="hero">
+  <div class="hero-top">
+    <div class="brand">✨ لقطة<span>.</span></div>
+    <button type="button" class="icon-btn" id="profileBtnHero" title="حسابي" style="background:rgba(255,255,255,.15);">👤</button>
+  </div>
+  <div class="hero-slogan">بيع واشتري كل شي مستعمل قريب منك</div>
+  <div class="search-bar" style="position:relative;">
+    <input type="text" id="searchInput" placeholder="عن ماذا تبحث؟" autocomplete="off">
+    <button type="button" class="filter-btn" id="voiceSearchBtn" style="display:none;">🎤</button>
+    <button type="button" class="filter-btn" id="openFilterBtn">🎛️</button>
+    <div id="searchSuggest" class="search-suggest"></div>
+  </div>
+</div>
 <div class="mosaic-strip"></div>
 
 <main>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="شو عم تدور عليه؟">
+  <div class="cat-circles" id="catCircles">
+    <div class="cat-circle-item active" data-cat="الكل">
+      <div class="cat-circle-icon">🗂️</div>
+      <div class="cat-circle-label">الكل</div>
+    </div>
+    <div class="cat-circle-item" data-cat="موبايلات">
+      <div class="cat-circle-icon">📱</div>
+      <div class="cat-circle-label">موبايلات</div>
+    </div>
+    <div class="cat-circle-item" data-cat="ملابس">
+      <div class="cat-circle-icon">👕</div>
+      <div class="cat-circle-label">ملابس</div>
+    </div>
+    <div class="cat-circle-item" data-cat="أثاث">
+      <div class="cat-circle-icon">🛋️</div>
+      <div class="cat-circle-label">أثاث</div>
+    </div>
+    <div class="cat-circle-item" data-cat="أجهزة">
+      <div class="cat-circle-icon">💻</div>
+      <div class="cat-circle-label">أجهزة</div>
+    </div>
+    <div class="cat-circle-item" data-cat="سيارات">
+      <div class="cat-circle-icon">🚗</div>
+      <div class="cat-circle-label">سيارات</div>
+    </div>
+    <div class="cat-circle-item" data-cat="أخرى">
+      <div class="cat-circle-icon">🏷️</div>
+      <div class="cat-circle-label">أخرى</div>
+    </div>
   </div>
-  <div class="filters" id="filterChips">
+
+  <div class="filters" id="filterChips" style="display:none;">
     <div class="chip active" data-cat="الكل">الكل</div>
     <div class="chip" data-cat="أثاث">أثاث</div>
     <div class="chip" data-cat="أجهزة">أجهزة</div>
@@ -426,9 +669,35 @@
   </div>
   <div class="subcat-bar" id="subcatBar" style="display:none;"></div>
 
+  <div id="homeSections"></div>
+
   <div id="listingsArea">
     <div class="loading-spin"></div>
   </div>
+</main>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-item active" data-nav="home">
+    <div class="bn-icon">🏠</div>
+    <div>الرئيسية</div>
+  </div>
+  <div class="bottom-nav-item" data-nav="favorites">
+    <div class="bn-icon">🤍</div>
+    <div>المفضلة</div>
+  </div>
+  <div class="bottom-nav-item" data-nav="add" id="bottomAddBtn">
+    <div class="bn-icon">➕</div>
+    <div>أضف</div>
+  </div>
+  <div class="bottom-nav-item" data-nav="messages">
+    <div class="bn-icon">💬</div>
+    <div>الرسائل</div>
+  </div>
+  <div class="bottom-nav-item" data-nav="profile" id="bottomProfileBtn">
+    <div class="bn-icon">👤</div>
+    <div>حسابي</div>
+  </div>
+</nav>
 </main>
 
 <!-- ===== Subcategory Picker Sheet (للفلتر وللنشر، معاً) ===== -->
@@ -438,6 +707,51 @@
     <div class="sheet-handle"></div>
     <h2 id="subcatTitle">اختار الفئة الفرعية</h2>
     <div id="subcatList"></div>
+  </div>
+</div>
+
+<!-- ===== Filters & Sort Sheet ===== -->
+<div class="overlay" id="filterOverlay">
+  <div class="sheet">
+    <button type="button" class="close-x" data-close="filterOverlay">✕</button>
+    <div class="sheet-handle"></div>
+    <h2>الفلاتر والترتيب</h2>
+
+    <div class="field">
+      <label>الترتيب</label>
+      <select id="sortSelect">
+        <option value="newest">الأحدث</option>
+        <option value="oldest">الأقدم</option>
+        <option value="price_asc">السعر: من الأقل للأكثر</option>
+        <option value="price_desc">السعر: من الأكثر للأقل</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>نطاق السعر (ل.س)</label>
+      <div style="display:flex;gap:8px;">
+        <input type="number" id="priceMin" placeholder="من" style="flex:1;">
+        <input type="number" id="priceMax" placeholder="إلى" style="flex:1;">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>حالة القطعة</label>
+      <div class="subcat-bar" id="conditionChips" style="overflow-x:visible;flex-wrap:wrap;">
+        <div class="subcat-chip" data-cond="جديد">جديد</div>
+        <div class="subcat-chip" data-cond="شبه جديد">شبه جديد</div>
+        <div class="subcat-chip" data-cond="مستعمل">مستعمل</div>
+        <div class="subcat-chip" data-cond="للأجزاء">للأجزاء</div>
+      </div>
+    </div>
+
+    <div class="field" id="brandFilterField" style="display:none;">
+      <label>الماركة</label>
+      <div class="subcat-bar" id="brandChips" style="overflow-x:visible;flex-wrap:wrap;"></div>
+    </div>
+
+    <button type="button" class="btn btn-ghost" id="clearFiltersBtn">تصفير الفلاتر</button>
+    <button type="button" class="btn btn-primary" id="applyFiltersBtn">عرض النتائج</button>
   </div>
 </div>
 
@@ -503,6 +817,19 @@
       <input type="text" id="adRegion" placeholder="مثلاً: دمشق - المزة">
     </div>
     <div class="field">
+      <label>الماركة (اختياري)</label>
+      <input type="text" id="adBrand" placeholder="مثلاً: Samsung, Apple, IKEA...">
+    </div>
+    <div class="field">
+      <label>حالة القطعة</label>
+      <select id="adCondition">
+        <option value="جديد">جديد</option>
+        <option value="شبه جديد">شبه جديد</option>
+        <option value="مستعمل" selected>مستعمل</option>
+        <option value="للأجزاء">للأجزاء</option>
+      </select>
+    </div>
+    <div class="field">
       <label>وصف مختصر (اختياري)</label>
       <textarea id="adDesc" placeholder="حالة القطعة، تفاصيل إضافية..."></textarea>
     </div>
@@ -554,8 +881,17 @@ let allListings = [];
 let activeCategory = "الكل";
 let activeSubcategory = null; // null يعني كل الفئة الرئيسية بدون تحديد فرع
 
+// ---------- Filters & Sort state ----------
+let filterState = {
+  sort: 'newest',
+  priceMin: null,
+  priceMax: null,
+  conditions: [], // array of selected condition strings, فاضية = كل الحالات
+  brands: [] // فاضية = كل الماركات
+};
+
 const CATEGORY_TREE = {
-  "ملابس": ["ملابس رجالي", "ملابس حريمي", "ملابس أطفال", "أحذية", "حقائب", "إكسسوارات"],
+  "ملابس": ["ملابس رجالي", "ملابس نسائي", "ملابس أطفال", "أحذية", "حقائب", "إكسسوارات"],
   "موبايلات": ["موبايلات", "أجهزة لوحية (تابلت)", "ساعات ذكية", "إكسسوارات موبايل", "سماعات"],
   "أجهزة": ["أجهزة كهربائية منزلية", "أجهزة مطبخ", "كمبيوتر ولابتوب", "تلفزيونات وشاشات", "أجهزة صوت"],
   "أثاث": ["غرف نوم", "صالونات وكنب", "طاولات وكراسي", "مطابخ", "ديكور ومفروشات"],
@@ -593,8 +929,28 @@ function timeAgo(ts){
 
 // ---------- Auth ----------
 let authMode = 'login';
-document.getElementById('profileBtn').addEventListener('click', ()=>{
+function openProfileOrAuth(){
   if(currentUser){ openProfile(); } else { show('authOverlay'); }
+}
+document.getElementById('profileBtnHero').addEventListener('click', openProfileOrAuth);
+document.getElementById('bottomProfileBtn').addEventListener('click', openProfileOrAuth);
+document.getElementById('bottomAddBtn').addEventListener('click', ()=>{
+  document.getElementById('openAddBtn').click();
+});
+
+// عناصر الشريط السفلي العامة: "الرئيسية" نشط دايماً عملياً، الباقي قريباً لحد ما يضاف backend مخصص لكل قسم
+document.querySelectorAll('.bottom-nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const nav = item.dataset.nav;
+    if(nav === 'home'){
+      document.querySelectorAll('.bottom-nav-item').forEach(c=>c.classList.remove('active'));
+      item.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    } else if(nav === 'favorites' || nav === 'messages'){
+      toast('هاد القسم قريباً إن شاء الله 🚧');
+    }
+    // add و profile معرّفين بدالتهم الخاصة فوق
+  });
 });
 document.getElementById('tabLogin').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -677,13 +1033,16 @@ function friendlyAuthError(code){
 
 onAuthStateChanged(auth, (user)=>{
   currentUser = user;
-  const btn = document.getElementById('profileBtn');
+  const heroBtn = document.getElementById('profileBtnHero');
+  const bottomBtn = document.getElementById('bottomProfileBtn');
   if(user){
-    btn.textContent = '✅';
-    btn.title = user.displayName || user.email;
+    heroBtn.textContent = '✅';
+    heroBtn.title = user.displayName || user.email;
+    bottomBtn.querySelector('.bn-icon').textContent = '✅';
   } else {
-    btn.textContent = '👤';
-    btn.title = 'حسابي';
+    heroBtn.textContent = '👤';
+    heroBtn.title = 'حسابي';
+    bottomBtn.querySelector('.bn-icon').textContent = '👤';
   }
 });
 
@@ -736,6 +1095,8 @@ function openAddSheet(item){
   document.getElementById('adSubcategory').value = item ? (item.subcategory || '') : '';
   updateCatBtnLabel();
   document.getElementById('adRegion').value = item ? item.region : '';
+  document.getElementById('adBrand').value = item ? (item.brand || '') : '';
+  document.getElementById('adCondition').value = item ? (item.condition || 'مستعمل') : 'مستعمل';
   document.getElementById('adDesc').value = item ? (item.desc||'') : '';
   const preview = document.getElementById('imgPreview');
   if(item && item.imageUrl){
@@ -835,6 +1196,8 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
   const category = document.getElementById('adCategory').value;
   const subcategory = document.getElementById('adSubcategory').value;
   const region = document.getElementById('adRegion').value.trim();
+  const condition = document.getElementById('adCondition').value;
+  const brand = document.getElementById('adBrand').value.trim();
   const desc = document.getElementById('adDesc').value.trim();
   const errEl = document.getElementById('addError');
   errEl.style.display = 'none';
@@ -866,13 +1229,13 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
         return;
       }
       await updateDoc(doc(db, 'listings', editingId), {
-        title, price: Number(price), category, subcategory, region, desc,
+        title, price: Number(price), category, subcategory, region, condition, brand, desc,
         imageUrl: selectedImageBase64 || ''
       });
       toast('تم حفظ التعديلات ✅');
     } else {
       await addDoc(collection(db, 'listings'), {
-        title, price: Number(price), category, subcategory, region, desc,
+        title, price: Number(price), category, subcategory, region, condition, brand, desc,
         imageUrl: selectedImageBase64 || '',
         sellerId: currentUser.uid,
         sellerName: currentUser.displayName || 'مستخدم',
@@ -932,6 +1295,22 @@ document.getElementById('filterChips').addEventListener('click', (e)=>{
   renderListings();
 });
 
+// ---------- Category circles (نفس منطق الفلاتر، شكل دائري زي Vinted) ----------
+document.getElementById('catCircles').addEventListener('click', (e)=>{
+  const item = e.target.closest('.cat-circle-item');
+  if(!item) return;
+  document.querySelectorAll('.cat-circle-item').forEach(c=>c.classList.remove('active'));
+  item.classList.add('active');
+  activeCategory = item.dataset.cat;
+  activeSubcategory = null;
+  // مزامنة شريط الفلاتر النصي (مخفي بس لسا مستخدم بالمنطق الداخلي)
+  document.querySelectorAll('.chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.cat === activeCategory);
+  });
+  renderSubcatBar();
+  renderListings();
+});
+
 function renderSubcatBar(){
   const bar = document.getElementById('subcatBar');
   const subs = CATEGORY_TREE[activeCategory] || [];
@@ -953,7 +1332,272 @@ document.getElementById('subcatBar').addEventListener('click', (e)=>{
   renderListings();
 });
 
-document.getElementById('searchInput').addEventListener('input', renderListings);
+// ---------- Filters & Sort sheet ----------
+// ---------- البحث الصوتي (يعتمد على دعم المتصفح، يظهر بصمت لو متوفر) ----------
+(function initVoiceSearch(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const voiceBtn = document.getElementById('voiceSearchBtn');
+  if(!SpeechRecognition){
+    return; // المتصفح ما بيدعم، الزر يضل مخفي بدون أي رسالة خطأ
+  }
+  voiceBtn.style.display = '';
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'ar-SA';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  let listening = false;
+  voiceBtn.addEventListener('click', ()=>{
+    if(listening) return;
+    listening = true;
+    voiceBtn.textContent = '🔴';
+    try{ recognition.start(); }catch(e){ listening = false; voiceBtn.textContent = '🎤'; }
+  });
+  recognition.addEventListener('result', (e)=>{
+    const text = e.results[0][0].transcript;
+    document.getElementById('searchInput').value = text;
+    renderListings();
+    renderSearchSuggest();
+  });
+  recognition.addEventListener('end', ()=>{
+    listening = false;
+    voiceBtn.textContent = '🎤';
+  });
+  recognition.addEventListener('error', ()=>{
+    listening = false;
+    voiceBtn.textContent = '🎤';
+    toast('ما قدرنا نسمعك منيح، جرب مرة تانية');
+  });
+})();
+
+document.getElementById('openFilterBtn').addEventListener('click', ()=>{
+  document.getElementById('sortSelect').value = filterState.sort;
+  document.getElementById('priceMin').value = filterState.priceMin ?? '';
+  document.getElementById('priceMax').value = filterState.priceMax ?? '';
+  document.querySelectorAll('#conditionChips .subcat-chip').forEach(c=>{
+    c.classList.toggle('active', filterState.conditions.includes(c.dataset.cond));
+  });
+
+  // بناء قائمة الماركات من الإعلانات الموجودة فعلياً (فلترة ديناميكية زي Vinted)
+  const brandField = document.getElementById('brandFilterField');
+  const brandBox = document.getElementById('brandChips');
+  const brands = [...new Set(allListings.map(i=>i.brand).filter(Boolean))].sort();
+  if(brands.length){
+    brandField.style.display = 'block';
+    brandBox.innerHTML = brands.map(b=>
+      `<div class="subcat-chip${filterState.brands.includes(b)?' active':''}" data-brand="${escapeHtml(b)}">${escapeHtml(b)}</div>`
+    ).join('');
+  } else {
+    brandField.style.display = 'none';
+    brandBox.innerHTML = '';
+  }
+
+  show('filterOverlay');
+});
+
+document.getElementById('brandChips').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.subcat-chip');
+  if(!chip) return;
+  chip.classList.toggle('active');
+});
+
+document.getElementById('conditionChips').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.subcat-chip');
+  if(!chip) return;
+  chip.classList.toggle('active'); // اختيار متعدد للحالة (جديد + شبه جديد معاً مثلاً)
+});
+
+document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
+  filterState = { sort: 'newest', priceMin: null, priceMax: null, conditions: [], brands: [] };
+  document.getElementById('sortSelect').value = 'newest';
+  document.getElementById('priceMin').value = '';
+  document.getElementById('priceMax').value = '';
+  document.querySelectorAll('#conditionChips .subcat-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('#brandChips .subcat-chip').forEach(c=>c.classList.remove('active'));
+  updateFilterBtnState();
+  renderListings();
+  hide('filterOverlay');
+});
+
+document.getElementById('applyFiltersBtn').addEventListener('click', ()=>{
+  filterState.sort = document.getElementById('sortSelect').value;
+  const min = document.getElementById('priceMin').value.trim();
+  const max = document.getElementById('priceMax').value.trim();
+  filterState.priceMin = min ? Number(min) : null;
+  filterState.priceMax = max ? Number(max) : null;
+  filterState.conditions = Array.from(document.querySelectorAll('#conditionChips .subcat-chip.active'))
+    .map(c=>c.dataset.cond);
+  filterState.brands = Array.from(document.querySelectorAll('#brandChips .subcat-chip.active'))
+    .map(c=>c.dataset.brand);
+  updateFilterBtnState();
+  renderListings();
+  hide('filterOverlay');
+});
+
+function updateFilterBtnState(){
+  const btn = document.getElementById('openFilterBtn');
+  const hasActive = filterState.sort !== 'newest' || filterState.priceMin !== null ||
+                     filterState.priceMax !== null || filterState.conditions.length > 0 ||
+                     filterState.brands.length > 0;
+  btn.classList.toggle('has-filters', hasActive);
+  // شيل نقطة قديمة إن وجدت قبل إضافة جديدة
+  const oldDot = btn.querySelector('.dot');
+  if(oldDot) oldDot.remove();
+  if(hasActive){
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    btn.appendChild(dot);
+  }
+}
+
+// بحث فوري حرف بحرف (زي Vinted) مع debounce خفيف جداً (120ms) لمنع أي تهنيج
+// مع كمية إعلانات أكبر، بدون أي تأخير محسوس للمستخدم
+let searchDebounceId = null;
+document.getElementById('searchInput').addEventListener('input', ()=>{
+  clearTimeout(searchDebounceId);
+  searchDebounceId = setTimeout(()=>{ renderListings(); renderSearchSuggest(); }, 120);
+});
+
+// ---------- سجل البحث + عمليات بحث شائعة ----------
+const SEARCH_HISTORY_KEY = 'loqta_search_history';
+const SAVED_SEARCHES_KEY = 'loqta_saved_searches';
+
+function getSavedSearches(){
+  try{ return JSON.parse(localStorage.getItem(SAVED_SEARCHES_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+
+function toggleSavedSearch(term){
+  if(!term) return;
+  let saved = getSavedSearches();
+  if(saved.includes(term)){
+    saved = saved.filter(t=> t !== term);
+    toast('تم إلغاء التنبيه لهاد البحث');
+  } else {
+    saved.push(term);
+    toast('تم حفظ البحث، رح نخبرك لو نزل إعلان جديد يطابقه 🔔');
+  }
+  try{ localStorage.setItem(SAVED_SEARCHES_KEY, JSON.stringify(saved)); }catch(e){}
+}
+
+// فحص محلي بسيط: لما تفتح الصفحة، نشوف هل في إعلانات جديدة (آخر 24 ساعة) تطابق أي بحث محفوظ
+function checkSavedSearchAlerts(){
+  const saved = getSavedSearches();
+  if(!saved.length) return;
+  const dayAgo = Date.now() - 24*60*60*1000;
+  const freshItems = allListings.filter(i=> (i.createdAt||0) > dayAgo);
+  if(!freshItems.length) return;
+
+  const matchedTerms = saved.filter(term=>
+    freshItems.some(i=>{
+      const haystack = [i.title, i.desc, i.category, i.subcategory, i.region, i.brand]
+        .filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(term.toLowerCase());
+    })
+  );
+  if(matchedTerms.length){
+    toast(`🔔 في إعلانات جديدة تطابق بحثك: ${matchedTerms.join('، ')}`);
+  }
+}
+const POPULAR_SEARCHES = ['موبايل', 'غسالة', 'كنبة', 'دراجة', 'طاولة', 'لابتوب'];
+
+function getSearchHistory(){
+  try{
+    return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '[]');
+  }catch(e){ return []; }
+}
+
+function saveSearchTerm(term){
+  if(!term || term.length < 2) return;
+  let hist = getSearchHistory().filter(t=> t !== term);
+  hist.unshift(term);
+  hist = hist.slice(0, 6); // آخر 6 عمليات بحث بس
+  try{ localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(hist)); }catch(e){}
+}
+
+function clearSearchHistory(){
+  try{ localStorage.removeItem(SEARCH_HISTORY_KEY); }catch(e){}
+  renderSearchSuggest();
+}
+
+function renderSearchSuggest(){
+  const input = document.getElementById('searchInput');
+  const box = document.getElementById('searchSuggest');
+  const term = input.value.trim().toLowerCase();
+  const hist = getSearchHistory();
+
+  let html = '';
+
+  if(term){
+    // اقتراحات أثناء الكتابة: عناوين + ماركات + مناطق مطابقة، كل وحدة بأيقونتها
+    const titleMatches = [...new Set(
+      allListings.map(i=>i.title).filter(Boolean).filter(t=> t.toLowerCase().includes(term))
+    )].slice(0, 4);
+    const brandMatches = [...new Set(
+      allListings.map(i=>i.brand).filter(Boolean).filter(b=> b.toLowerCase().includes(term))
+    )].slice(0, 2);
+    const regionMatches = [...new Set(
+      allListings.map(i=>i.region).filter(Boolean).filter(r=> r.toLowerCase().includes(term))
+    )].slice(0, 2);
+
+    if(titleMatches.length || brandMatches.length || regionMatches.length){
+      html += `<div class="sg-section-title">يعرض</div>`;
+      html += titleMatches.map(m=>`<div class="sg-row" data-term="${escapeHtml(m)}">🔍 ${escapeHtml(m)}</div>`).join('');
+      html += brandMatches.map(m=>`<div class="sg-row" data-term="${escapeHtml(m)}">🏷️ ${escapeHtml(m)}</div>`).join('');
+      html += regionMatches.map(m=>`<div class="sg-row" data-term="${escapeHtml(m)}">📍 ${escapeHtml(m)}</div>`).join('');
+    }
+    const alreadySaved = getSavedSearches().includes(input.value.trim());
+    html += `<div class="sg-clear" id="saveSearchBtn">${alreadySaved ? '✅ هاد البحث محفوظ' : '🔔 حفظ هاد البحث وتنبيهي بجديد'}</div>`;
+  } else {
+    if(hist.length){
+      html += `<div class="sg-section-title">آخر عمليات البحث</div>`;
+      html += hist.map(h=>`<div class="sg-row" data-term="${escapeHtml(h)}">📍 ${escapeHtml(h)}</div>`).join('');
+    }
+    html += `<div class="sg-section-title">🔥 الأكثر بحثاً</div>`;
+    html += POPULAR_SEARCHES.map(p=>`<div class="sg-row" data-term="${escapeHtml(p)}">${escapeHtml(p)}</div>`).join('');
+    if(hist.length){
+      html += `<div class="sg-clear" id="clearHistoryBtn">مسح سجل البحث</div>`;
+    }
+  }
+
+  box.innerHTML = html;
+  box.classList.toggle('show', !!html);
+
+  box.querySelectorAll('.sg-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      input.value = row.dataset.term;
+      box.classList.remove('show');
+      renderListings();
+    });
+  });
+  const clearBtn = document.getElementById('clearHistoryBtn');
+  if(clearBtn) clearBtn.addEventListener('click', clearSearchHistory);
+  const saveBtn = document.getElementById('saveSearchBtn');
+  if(saveBtn) saveBtn.addEventListener('click', ()=>{
+    toggleSavedSearch(input.value.trim());
+    renderSearchSuggest();
+  });
+}
+
+document.getElementById('searchInput').addEventListener('focus', renderSearchSuggest);
+
+// تسجيل البحث بالسجل وإغلاق القائمة عند الضغط Enter أو فقدان التركيز
+document.getElementById('searchInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    saveSearchTerm(document.getElementById('searchInput').value.trim());
+    document.getElementById('searchSuggest').classList.remove('show');
+  }
+});
+document.addEventListener('click', (e)=>{
+  const box = document.getElementById('searchSuggest');
+  const bar = document.querySelector('.search-bar');
+  if(!bar.contains(e.target)){
+    // إذا في نص مكتوب وما ضغط Enter، نسجله برضو لما يطلع برّا
+    const val = document.getElementById('searchInput').value.trim();
+    if(val) saveSearchTerm(val);
+    box.classList.remove('show');
+  }
+});
 
 // ---------- Load & render listings ----------
 async function loadListings(){
@@ -973,6 +1617,7 @@ async function loadListings(){
     if(timedOut) return; // المستخدم شاف رسالة المهلة، ما نعيد الكتابة فوقها بهدوء
     allListings = snap.docs.map(d=>({id:d.id, ...d.data()}));
     renderListings();
+    checkSavedSearchAlerts();
   }catch(e){
     clearTimeout(timeoutId);
     console.error(e);
@@ -985,7 +1630,95 @@ async function loadListings(){
   }
 }
 
+// ---------- اقتراحات بعد عدم وجود نتائج بحث ----------
+function buildNoResultsSuggestions(term){
+  const hasFilters = filterState.priceMin !== null || filterState.priceMax !== null ||
+                      filterState.conditions.length > 0 || filterState.brands.length > 0;
+  let html = '<div class="no-results-suggest">';
+  if(hasFilters){
+    html += `<button type="button" class="btn btn-ghost" id="nrClearFilters" style="margin-bottom:8px;">جرب تصفير الفلاتر النشطة</button>`;
+  }
+  // كلمات شائعة قريبة (غير الكلمة المكتوبة) كاقتراحات بديلة سريعة
+  const alt = POPULAR_SEARCHES.filter(p=> p.toLowerCase() !== term).slice(0, 4);
+  if(alt.length){
+    html += `<div style="font-size:13px;color:#9a9182;margin-bottom:6px;">أو جرب:</div>`;
+    html += `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">`;
+    html += alt.map(a=>`<span class="subcat-chip nr-term" data-term="${escapeHtml(a)}">${escapeHtml(a)}</span>`).join('');
+    html += `</div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function bindNoResultsSuggestions(){
+  const clearBtn = document.getElementById('nrClearFilters');
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      filterState = { sort: 'newest', priceMin: null, priceMax: null, conditions: [], brands: [] };
+      updateFilterBtnState();
+      renderListings();
+    });
+  }
+  document.querySelectorAll('.nr-term').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.getElementById('searchInput').value = chip.dataset.term;
+      renderListings();
+    });
+  });
+}
+
+// ---------- أقسام الصفحة الرئيسية الأفقية (الأكثر مشاهدة / وصل حديثاً) ----------
+function hCardHtml(item){
+  const img = item.imageUrl
+    ? `<img src="${item.imageUrl}" loading="lazy">`
+    : `<div class="ph">📦</div>`;
+  return `
+    <div class="h-card" data-id="${item.id}">
+      ${img}
+      <div class="h-card-body">
+        <div class="h-card-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
+        <div class="h-card-title">${escapeHtml(item.title)}</div>
+      </div>
+    </div>`;
+}
+
+function renderHomeSections(){
+  const container = document.getElementById('homeSections');
+  const term = document.getElementById('searchInput').value.trim();
+  const isDefaultView = activeCategory === 'الكل' && !activeSubcategory && !term;
+
+  if(!isDefaultView || allListings.length === 0){
+    container.innerHTML = '';
+    return;
+  }
+
+  // "الأكثر مشاهدة" تقريبي: نعتمد على الأقدم نشراً كمؤشر بسيط للثقة لحد ما يضاف عداد مشاهدات حقيقي
+  const mostViewed = [...allListings].slice(0, 8);
+  const recent = [...allListings].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0, 8);
+
+  let html = '';
+  if(mostViewed.length){
+    html += `
+      <div class="h-section">
+        <div class="h-section-title">🔥 الأكثر تصفّحاً</div>
+        <div class="h-scroll">${mostViewed.map(hCardHtml).join('')}</div>
+      </div>`;
+  }
+  if(recent.length){
+    html += `
+      <div class="h-section">
+        <div class="h-section-title">✨ وصل حديثاً</div>
+        <div class="h-scroll">${recent.map(hCardHtml).join('')}</div>
+      </div>`;
+  }
+  container.innerHTML = html;
+  container.querySelectorAll('.h-card').forEach(c=>{
+    c.addEventListener('click', ()=> openDetail(c.dataset.id));
+  });
+}
+
 function renderListings(){
+  renderHomeSections();
   const term = document.getElementById('searchInput').value.trim().toLowerCase();
   let items = allListings;
   if(activeCategory !== 'الكل'){
@@ -995,14 +1728,53 @@ function renderListings(){
     items = items.filter(i=>i.subcategory === activeSubcategory);
   }
   if(term){
-    items = items.filter(i=> (i.title||'').toLowerCase().includes(term) || (i.region||'').toLowerCase().includes(term));
+    items = items.filter(i=>{
+      const haystack = [
+        i.title, i.desc, i.category, i.subcategory, i.region, i.brand, i.condition
+      ].filter(Boolean).join(' ').toLowerCase();
+      return fuzzyIncludes(haystack, term);
+    });
   }
+  if(filterState.priceMin !== null){
+    items = items.filter(i=> Number(i.price) >= filterState.priceMin);
+  }
+  if(filterState.priceMax !== null){
+    items = items.filter(i=> Number(i.price) <= filterState.priceMax);
+  }
+  if(filterState.conditions.length > 0){
+    items = items.filter(i=> filterState.conditions.includes(i.condition));
+  }
+  if(filterState.brands.length > 0){
+    items = items.filter(i=> filterState.brands.includes(i.brand));
+  }
+
+  items = [...items]; // ما نلمس allListings الأصلية
+  if(filterState.sort === 'price_asc'){
+    items.sort((a,b)=> Number(a.price) - Number(b.price));
+  } else if(filterState.sort === 'price_desc'){
+    items.sort((a,b)=> Number(b.price) - Number(a.price));
+  } else if(filterState.sort === 'oldest'){
+    items.sort((a,b)=> (a.createdAt||0) - (b.createdAt||0));
+  } else { // newest (الافتراضي)
+    items.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+  }
+
   const area = document.getElementById('listingsArea');
   if(items.length === 0){
-    area.innerHTML = '<div class="empty"><div class="big">🧺</div>ما في إعلانات هلق بهاد الفئة<br>كون أول واحد ينشر شي!</div>';
+    if(term){
+      const suggestions = buildNoResultsSuggestions(term);
+      area.innerHTML = `<div class="empty"><div class="big">🔍</div>ما في نتائج لـ"${escapeHtml(term)}"<br>جرب كلمة تانية أو شيك الفئة</div>${suggestions}`;
+      bindNoResultsSuggestions();
+    } else if(filterState.priceMin !== null || filterState.priceMax !== null || filterState.conditions.length > 0 || filterState.brands.length > 0){
+      area.innerHTML = '<div class="empty"><div class="big">🎛️</div>ما في إعلانات مطابقة لهاد الفلتر<br>جرب تصفّر الفلاتر</div>';
+    } else {
+      area.innerHTML = '<div class="empty"><div class="big">🧺</div>ما في إعلانات هلق بهاد الفئة<br>كون أول واحد ينشر شي!</div>';
+    }
     return;
   }
-  area.innerHTML = `<div class="grid">${items.map(cardHtml).join('')}</div>`;
+  const term2 = document.getElementById('searchInput').value.trim();
+  const showAllTitle = activeCategory === 'الكل' && !activeSubcategory && !term2 && allListings.length > 0;
+  area.innerHTML = `${showAllTitle ? '<div class="h-section-title">🗂️ كل الإعلانات</div>' : ''}<div class="grid">${items.map(cardHtml).join('')}</div>`;
   document.querySelectorAll('.card').forEach(c=>{
     c.addEventListener('click', ()=> openDetail(c.dataset.id));
   });
@@ -1012,13 +1784,16 @@ function cardHtml(item){
   const img = item.imageUrl
     ? `<img src="${item.imageUrl}" loading="lazy">`
     : `<div class="ph">📦</div>`;
+  const badge = (item.condition === 'جديد' || item.condition === 'شبه جديد')
+    ? `<div class="card-badge">${escapeHtml(item.condition)}</div>` : '';
   return `
     <div class="card" data-id="${item.id}">
       ${img}
+      ${badge}
       <div class="card-body">
         <div class="card-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
         <div class="card-title">${escapeHtml(item.title)}</div>
-        <div class="card-meta">📍 ${escapeHtml(item.region||'')}</div>
+        <div class="card-meta">📍 ${escapeHtml(item.region||'')}${item.condition ? ' · '+escapeHtml(item.condition) : ''}</div>
       </div>
     </div>`;
 }
@@ -1048,6 +1823,33 @@ function escapeHtml(s){
   return div.innerHTML;
 }
 
+// ---------- بحث تقريبي خفيف (يتسامح مع خطأ إملائي واحد أو حرفين) ----------
+// مفيد لحالات زي "ايفون" بدل "آيفون"، أو "كرسي" مكتوب "كرس"
+function fuzzyIncludes(haystack, needle){
+  if(!needle) return true;
+  if(haystack.includes(needle)) return true;
+  if(needle.length < 3) return false; // كلمات قصيرة كتير، الفازي بيعطي نتائج مضللة
+  // نقارن كل نافذة بطول الكلمة المطلوبة + هامش بسيط، بدالة مسافة تحرير مبسطة
+  const words = haystack.split(/\s+/);
+  return words.some(w=> levenshteinLite(w, needle) <= 1);
+}
+
+function levenshteinLite(a, b){
+  // نسخة مبسطة ومحدودة (early exit) كفاية لكلمة واحدة، بدون مكتبة خارجية
+  if(Math.abs(a.length - b.length) > 2) return 99;
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, ()=> new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0] = i;
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      if(a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1];
+      else dp[i][j] = 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
 // ---------- Detail sheet ----------
 function openDetail(id){
   const item = allListings.find(i=>i.id===id);
@@ -1065,6 +1867,7 @@ function openDetail(id){
     <div class="detail-meta">
       <span class="badge">📍 ${escapeHtml(item.region||'')}</span>
       <span class="badge">${escapeHtml(item.category||'')}${item.subcategory ? ' ‹ '+escapeHtml(item.subcategory) : ''}</span>
+      ${item.condition ? `<span class="badge">${escapeHtml(item.condition)}</span>` : ''}
       <span class="badge">${timeAgo(item.createdAt)}</span>
     </div>
     ${item.desc ? `<p style="line-height:1.6;color:#555;">${escapeHtml(item.desc)}</p>` : ''}
