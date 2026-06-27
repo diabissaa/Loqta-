@@ -546,7 +546,51 @@
     overflow:hidden;
   }
   .img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-  .img-preview{width:100%;border-radius:14px;display:none;margin-bottom:10px;max-height:220px;object-fit:cover;}
+  .img-upload.disabled{opacity:.4;cursor:not-allowed;}
+  .img-upload.disabled input{cursor:not-allowed;pointer-events:none;}
+
+  .img-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .img-grid-item{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:10px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .img-grid-item img{width:100%;height:100%;object-fit:cover;display:block;}
+  .img-grid-item .img-remove-btn{
+    position:absolute;top:3px;left:3px;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:rgba(0,0,0,.6);
+    color:var(--white);
+    border:none;
+    font-size:12px;
+    line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .img-grid-item .img-cover-badge{
+    position:absolute;bottom:3px;right:3px;
+    background:rgba(61,90,69,.9);
+    color:var(--white);
+    font-size:9px;
+    font-weight:700;
+    padding:2px 6px;
+    border-radius:999px;
+  }
+  .img-grid-item.uploading::after{
+    content:'⏳';
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.7);
+    font-size:18px;
+  }
 
   .toast{
     position:fixed;
@@ -565,6 +609,31 @@
 
   /* listing detail */
   .detail-img{width:100%;aspect-ratio:1/1;border-radius:16px;object-fit:cover;background:#e8e0d0;margin-bottom:14px;}
+
+  .detail-gallery{margin-bottom:14px;}
+  .detail-gallery-scroll{
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    border-radius:16px;
+    scrollbar-width:none;
+  }
+  .detail-gallery-scroll::-webkit-scrollbar{display:none;}
+  .detail-gallery-img{
+    flex:0 0 100%;
+    scroll-snap-align:start;
+    margin-bottom:0;
+    border-radius:0;
+  }
+  .detail-gallery-dots{
+    display:flex;justify-content:center;gap:6px;margin-top:8px;
+  }
+  .dgd{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--line);
+    cursor:pointer;
+  }
+  .dgd.active{background:var(--green);}
   .detail-price{font-family:'Tajawal';font-weight:900;font-size:26px;color:var(--terra-dark);}
   .detail-title{font-size:18px;font-weight:700;margin:6px 0;}
   .detail-meta{font-size:13px;color:#8a8175;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;}
@@ -601,6 +670,94 @@
     border-radius:50%;animation:spin .7s linear infinite;margin:30px auto;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ===== Chat: قائمة المحادثات ===== */
+  .chat-list-row{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 4px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .chat-list-row:active{background:var(--cream);}
+  .chat-list-thumb{
+    width:54px;height:54px;border-radius:12px;object-fit:cover;flex-shrink:0;
+    background:linear-gradient(135deg,#e8e0d0,#dfd5c0);
+  }
+  .chat-list-thumb.ph{display:flex;align-items:center;justify-content:center;font-size:22px;color:#b8ac92;}
+  .chat-list-body{flex:1;min-width:0;}
+  .chat-list-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-list-last{font-size:12.5px;color:#8a8175;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+  .chat-list-last.unread{color:var(--ink);font-weight:700;}
+  .chat-list-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+  .chat-list-time{font-size:10.5px;color:#9a9182;}
+  .chat-unread-dot{
+    min-width:18px;height:18px;border-radius:999px;background:var(--terra);
+    color:var(--white);font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;padding:0 4px;
+  }
+
+  /* ===== Chat: شاشة المحادثة ===== */
+  .chat-room-overlay .sheet{
+    height:88vh;max-height:88vh;
+    display:flex;flex-direction:column;
+    padding:14px 0 0;
+  }
+  .chat-room-header{
+    display:flex;align-items:center;gap:10px;
+    padding:0 16px 12px;
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .chat-room-thumb{width:38px;height:38px;border-radius:9px;object-fit:cover;flex-shrink:0;background:var(--line);}
+  .chat-room-info{flex:1;min-width:0;}
+  .chat-room-listing-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-room-listing-price{font-size:12px;color:var(--terra-dark);font-weight:700;}
+  .chat-room-messages{
+    flex:1;overflow-y:auto;
+    padding:14px 16px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .msg-bubble{
+    max-width:78%;
+    padding:9px 13px;
+    border-radius:16px;
+    font-size:14px;
+    line-height:1.45;
+    word-break:break-word;
+  }
+  .msg-bubble.mine{
+    align-self:flex-end;
+    background:var(--green);
+    color:var(--white);
+    border-bottom-left-radius:5px;
+  }
+  .msg-bubble.theirs{
+    align-self:flex-start;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-bottom-right-radius:5px;
+  }
+  .msg-time{font-size:10px;opacity:.65;margin-top:3px;display:block;}
+  .chat-room-inputbar{
+    display:flex;gap:8px;align-items:center;
+    padding:10px 14px;
+    border-top:1px solid var(--line);
+    flex-shrink:0;
+    background:var(--cream);
+  }
+  .chat-room-inputbar input{
+    flex:1;padding:11px 14px;border-radius:999px;border:1px solid var(--line);
+    font-family:'Cairo',sans-serif;font-size:14px;background:var(--white);
+  }
+  .chat-room-inputbar input:focus{outline:2px solid var(--terra);}
+  .chat-send-btn{
+    width:42px;height:42px;border-radius:50%;background:var(--green);color:var(--white);
+    border:none;font-size:18px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;flex-shrink:0;
+  }
+  .chat-send-btn:active{background:var(--green-dark);}
+  .chat-send-btn:disabled{opacity:.5;}
+  .chat-empty-hint{text-align:center;color:#9a9182;font-size:13px;padding:40px 20px;}
 </style>
 </head>
 <body>
@@ -698,7 +855,6 @@
     <div>حسابي</div>
   </div>
 </nav>
-</main>
 
 <!-- ===== Subcategory Picker Sheet (للفلتر وللنشر، معاً) ===== -->
 <div class="overlay" id="subcatOverlay">
@@ -781,6 +937,27 @@
     </div>
     <div class="error-msg" id="authError"></div>
     <button type="button" class="btn btn-primary" id="authSubmit">دخول</button>
+    <div id="forgotPassRow" style="text-align:center;margin-top:10px;">
+      <button type="button" class="btn-ghost" id="forgotPassBtn" style="background:none;border:none;font-size:13px;cursor:pointer;">نسيت كلمة السر؟</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Reset Password Sheet ===== -->
+<div class="overlay" id="resetPassOverlay">
+  <div class="sheet">
+    <button type="button" class="close-x" data-close="resetPassOverlay">✕</button>
+    <div class="sheet-handle"></div>
+    <h2>استرجاع كلمة السر</h2>
+    <p style="font-size:13px;color:#8a8175;margin:-6px 0 14px;">
+      اكتب الإيميل اللي سجّلت حسابك فيه، وبنرسلّك رابط لتعيين كلمة سر جديدة.
+    </p>
+    <div class="field">
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="resetEmail" placeholder="example@email.com" autocomplete="off" name="loqta-reset-email-field">
+    </div>
+    <div class="error-msg" id="resetError"></div>
+    <button type="button" class="btn btn-primary" id="resetSubmit">إرسال رابط الاسترجاع</button>
   </div>
 </div>
 
@@ -791,11 +968,11 @@
     <div class="sheet-handle"></div>
     <h2 id="addSheetTitle">نشر إعلان جديد</h2>
     <div class="field">
-      <label>صورة القطعة</label>
-      <img class="img-preview" id="imgPreview">
+      <label>صور القطعة <span id="imgCountLabel" style="color:#9a9182;font-weight:400;">(0/8)</span></label>
+      <div class="img-grid" id="imgGrid"></div>
       <div class="img-upload" id="imgUploadBox">
-        📷 دوس لإضافة صورة
-        <input type="file" accept="image/*" id="imgInput">
+        📷 دوس لإضافة صور (لحد 8 صور)
+        <input type="file" accept="image/*" id="imgInput" multiple>
       </div>
     </div>
     <div class="field">
@@ -848,6 +1025,35 @@
   <div class="sheet" id="profileContent"></div>
 </div>
 
+<!-- ===== Chats List Sheet ===== -->
+<div class="overlay" id="chatsListOverlay">
+  <div class="sheet">
+    <button type="button" class="close-x" data-close="chatsListOverlay">✕</button>
+    <div class="sheet-handle"></div>
+    <h2>الرسائل</h2>
+    <div id="chatsListContent"></div>
+  </div>
+</div>
+
+<!-- ===== Chat Room Sheet ===== -->
+<div class="overlay chat-room-overlay" id="chatRoomOverlay">
+  <div class="sheet">
+    <div class="chat-room-header">
+      <button type="button" data-close="chatRoomOverlay" style="background:none;border:none;font-size:20px;color:#9a9182;cursor:pointer;padding:0 2px;">→</button>
+      <img class="chat-room-thumb" id="chatRoomThumb" src="">
+      <div class="chat-room-info">
+        <div class="chat-room-listing-title" id="chatRoomTitle"></div>
+        <div class="chat-room-listing-price" id="chatRoomPrice"></div>
+      </div>
+    </div>
+    <div class="chat-room-messages" id="chatRoomMessages"></div>
+    <div class="chat-room-inputbar">
+      <input type="text" id="chatMsgInput" placeholder="اكتب رسالتك..." autocomplete="off">
+      <button type="button" class="chat-send-btn" id="chatSendBtn">➤</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Firebase SDK -->
@@ -855,12 +1061,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  onAuthStateChanged, signOut, updateProfile
+  onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, getDocs, query, orderBy,
-  doc, getDoc, updateDoc, deleteDoc, serverTimestamp
+  doc, getDoc, updateDoc, deleteDoc, serverTimestamp,
+  onSnapshot, where, limit, setDoc, increment
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL, deleteObject
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCF6H8x-nR-G8YORYC5ulVbOUAXtPlRwxA",
@@ -875,6 +1085,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
+const MAX_IMAGES = 8; // أقصى عدد صور لكل إعلان
 
 let currentUser = null;
 let allListings = [];
@@ -937,8 +1149,9 @@ document.getElementById('bottomProfileBtn').addEventListener('click', openProfil
 document.getElementById('bottomAddBtn').addEventListener('click', ()=>{
   document.getElementById('openAddBtn').click();
 });
+document.querySelector('[data-nav="messages"]').addEventListener('click', openChatsList);
 
-// عناصر الشريط السفلي العامة: "الرئيسية" نشط دايماً عملياً، الباقي قريباً لحد ما يضاف backend مخصص لكل قسم
+// عناصر الشريط السفلي العامة: "الرئيسية" نشط دايماً عملياً، "المفضلة" قريباً، الباقي معرّف بدالته الخاصة
 document.querySelectorAll('.bottom-nav-item').forEach(item=>{
   item.addEventListener('click', ()=>{
     const nav = item.dataset.nav;
@@ -946,10 +1159,10 @@ document.querySelectorAll('.bottom-nav-item').forEach(item=>{
       document.querySelectorAll('.bottom-nav-item').forEach(c=>c.classList.remove('active'));
       item.classList.add('active');
       window.scrollTo({top:0, behavior:'smooth'});
-    } else if(nav === 'favorites' || nav === 'messages'){
+    } else if(nav === 'favorites'){
       toast('هاد القسم قريباً إن شاء الله 🚧');
     }
-    // add و profile معرّفين بدالتهم الخاصة فوق
+    // add و profile و messages معرّفين بدالتهم الخاصة فوق
   });
 });
 document.getElementById('tabLogin').addEventListener('click', (e)=>{
@@ -960,6 +1173,7 @@ document.getElementById('tabLogin').addEventListener('click', (e)=>{
   document.getElementById('nameField').style.display = 'none';
   document.getElementById('authTitle').textContent = 'تسجيل الدخول';
   document.getElementById('authSubmit').textContent = 'دخول';
+  document.getElementById('forgotPassRow').style.display = 'block';
 });
 document.getElementById('tabSignup').addEventListener('click', (e)=>{
   e.preventDefault();
@@ -969,6 +1183,7 @@ document.getElementById('tabSignup').addEventListener('click', (e)=>{
   document.getElementById('nameField').style.display = 'block';
   document.getElementById('authTitle').textContent = 'حساب جديد';
   document.getElementById('authSubmit').textContent = 'إنشاء الحساب';
+  document.getElementById('forgotPassRow').style.display = 'none';
 });
 
 document.getElementById('authSubmit').addEventListener('click', async (e)=>{
@@ -1027,9 +1242,51 @@ function friendlyAuthError(code){
     'auth/wrong-password':'كلمة السر غلط',
     'auth/user-not-found':'ما في حساب بهاد الإيميل',
     'auth/invalid-credential':'الإيميل أو كلمة السر غلط',
+    'auth/too-many-requests':'في محاولات كتير، انتظر شوي وجرب مرة تانية',
   };
   return map[code] || 'صار خطأ، جرب مرة تانية';
 }
+
+// ---------- استرجاع كلمة السر ----------
+document.getElementById('forgotPassBtn').addEventListener('click', ()=>{
+  // نعبّي حقل الإيميل تلقائياً لو المستخدم كتبه أصلاً بنموذج الدخول، يوفر عليه إعادة الكتابة
+  const typedEmail = document.getElementById('authEmail').value.trim();
+  document.getElementById('resetEmail').value = typedEmail;
+  document.getElementById('resetError').style.display = 'none';
+  hide('authOverlay');
+  show('resetPassOverlay');
+});
+
+document.getElementById('resetSubmit').addEventListener('click', async ()=>{
+  const email = document.getElementById('resetEmail').value.trim();
+  const errEl = document.getElementById('resetError');
+  errEl.style.display = 'none';
+  if(!email){
+    errEl.textContent = 'عبي الإيميل أول';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('resetSubmit');
+  btn.disabled = true;
+  try{
+    await sendPasswordResetEmail(auth, email);
+    hide('resetPassOverlay');
+    document.getElementById('resetEmail').value = '';
+    toast('تم إرسال رابط الاسترجاع، تحقق من بريدك الإلكتروني 📧');
+  }catch(e){
+    console.error(e);
+    // ملاحظة أمان: ما منفرّق بالرسالة بين "إيميل مش موجود" و"خطأ تقني"
+    // عشان ما نسهّل على أي حدا يتحقق وش الإيميلات المسجّلة بالتطبيق
+    if(e.code === 'auth/invalid-email'){
+      errEl.textContent = 'صيغة الإيميل غلط';
+    } else {
+      errEl.textContent = 'لو الإيميل مسجل عنا، رح يجيك رابط الاسترجاع. تحقق من بريدك (وملف الـ Spam كمان)';
+    }
+    errEl.style.display = 'block';
+  }finally{
+    btn.disabled = false;
+  }
+});
 
 onAuthStateChanged(auth, (user)=>{
   currentUser = user;
@@ -1046,31 +1303,128 @@ onAuthStateChanged(auth, (user)=>{
   }
 });
 
-// ---------- Image upload (compressed base64, no paid Storage needed) ----------
-let selectedImageBase64 = '';
+// ---------- Image upload (compressed, ثم رفع حقيقي لـ Firebase Storage) ----------
+let uploadedImages = []; // array of { url, path } — path يلزمنا للحذف من Storage لاحقاً
+let imagesToDeleteOnSave = []; // مسارات صور قديمة (وضع تعديل) لازم تُحذف من Storage لو المستخدم شالها
 
-document.getElementById('imgInput').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev)=>{
-    const img = new Image();
-    img.onload = ()=>{
-      const maxDim = 700;
-      let w = img.width, h = img.height;
-      if(w > h && w > maxDim){ h = h*maxDim/w; w = maxDim; }
-      else if(h > maxDim){ w = w*maxDim/h; h = maxDim; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
-      const preview = document.getElementById('imgPreview');
-      preview.src = selectedImageBase64;
-      preview.style.display = 'block';
+// ضغط الصور: نخفّض الأبعاد والجودة بشكل متدرّج لحد ما نوصل لحجم مناسب لباقات الإنترنت المحدودة.
+// هدفنا حجم نهائي أقصاه ~180KB للصورة الواحدة، بدون ما نضحي بوضوح الصورة بشكل ملحوظ.
+const TARGET_MAX_BYTES = 180 * 1024;
+
+function compressImageFile(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      const img = new Image();
+      img.onload = async ()=>{
+        try{
+          let maxDim = 900; // كانت 1000 — تخفيف بسيط بالأبعاد يقلل الحجم بشكل ملموس دون فرق يُلاحظ على شاشة موبايل
+          let quality = 0.7;
+          let blob = await drawAndEncode(img, maxDim, quality);
+
+          // لو الصورة لسا كبيرة (مثلاً صورة كاميرا عالية الدقة)، نزيد الضغط تدريجياً
+          let attempts = 0;
+          while(blob && blob.size > TARGET_MAX_BYTES && attempts < 4){
+            attempts++;
+            if(quality > 0.4){ quality -= 0.15; }
+            else { maxDim = Math.round(maxDim * 0.85); }
+            blob = await drawAndEncode(img, maxDim, quality);
+          }
+          resolve(blob);
+        }catch(err){ reject(err); }
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
     };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function drawAndEncode(img, maxDim, quality){
+  return new Promise((resolve)=>{
+    let w = img.width, h = img.height;
+    if(w > h && w > maxDim){ h = h*maxDim/w; w = maxDim; }
+    else if(h > maxDim){ w = w*maxDim/h; h = maxDim; }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    canvas.toBlob(blob=> resolve(blob), 'image/jpeg', quality);
+  });
+}
+
+function renderImgGrid(){
+  const grid = document.getElementById('imgGrid');
+  document.getElementById('imgCountLabel').textContent = `(${uploadedImages.length}/${MAX_IMAGES})`;
+  grid.innerHTML = uploadedImages.map((img, idx)=>`
+    <div class="img-grid-item" data-idx="${idx}">
+      <img src="${img.url}">
+      <button type="button" class="img-remove-btn" data-idx="${idx}">✕</button>
+      ${idx === 0 ? '<div class="img-cover-badge">غلاف</div>' : ''}
+    </div>`).join('');
+  grid.querySelectorAll('.img-remove-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx = Number(btn.dataset.idx);
+      const removed = uploadedImages.splice(idx, 1)[0];
+      if(removed && removed.path) imagesToDeleteOnSave.push(removed.path);
+      renderImgGrid();
+      updateImgUploadBoxState();
+    });
+  });
+  updateImgUploadBoxState();
+}
+
+function updateImgUploadBoxState(){
+  const box = document.getElementById('imgUploadBox');
+  const full = uploadedImages.length >= MAX_IMAGES;
+  box.classList.toggle('disabled', full);
+  box.childNodes[0] && (box.firstChild.textContent = full
+    ? '📷 وصلت للحد الأقصى (8 صور)'
+    : '📷 دوس لإضافة صور (لحد 8 صور)');
+}
+
+document.getElementById('imgInput').addEventListener('change', async (e)=>{
+  const files = Array.from(e.target.files || []);
+  e.target.value = ''; // يسمح يعيد اختيار نفس الملف لاحقاً لو حذفه وحاب يرجعه
+  if(!files.length) return;
+  if(!currentUser){
+    toast('لازم تسجل دخول أول قبل رفع الصور');
+    return;
+  }
+
+  const availableSlots = MAX_IMAGES - uploadedImages.length;
+  if(availableSlots <= 0){
+    toast(`أقصى عدد صور هو ${MAX_IMAGES}`);
+    return;
+  }
+  const filesToUpload = files.slice(0, availableSlots);
+  if(files.length > availableSlots){
+    toast(`بس قدرنا نضيف ${availableSlots} صورة، وصلت للحد الأقصى`);
+  }
+
+  for(const file of filesToUpload){
+    // placeholder مؤقت أثناء الرفع، بنفس مكانه بالقائمة
+    const tempIdx = uploadedImages.length;
+    uploadedImages.push({ url: '', path: null, uploading: true });
+    renderImgGrid();
+    const gridItem = document.querySelector(`.img-grid-item[data-idx="${tempIdx}"]`);
+    if(gridItem) gridItem.classList.add('uploading');
+
+    try{
+      const blob = await compressImageFile(file);
+      const path = `listings/${currentUser.uid}/${Date.now()}_${Math.random().toString(36).slice(2,8)}.jpg`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
+      const url = await getDownloadURL(storageRef);
+      uploadedImages[tempIdx] = { url, path, uploading: false };
+    }catch(err){
+      console.error(err);
+      uploadedImages.splice(tempIdx, 1);
+      toast('صار خطأ برفع إحدى الصور، جرب مرة تانية');
+    }
+    renderImgGrid();
+  }
 });
 
 // ---------- Add / Edit listing ----------
@@ -1098,15 +1452,20 @@ function openAddSheet(item){
   document.getElementById('adBrand').value = item ? (item.brand || '') : '';
   document.getElementById('adCondition').value = item ? (item.condition || 'مستعمل') : 'مستعمل';
   document.getElementById('adDesc').value = item ? (item.desc||'') : '';
-  const preview = document.getElementById('imgPreview');
-  if(item && item.imageUrl){
-    preview.src = item.imageUrl;
-    preview.style.display = 'block';
-    selectedImageBase64 = item.imageUrl;
+
+  imagesToDeleteOnSave = [];
+  if(item && Array.isArray(item.images) && item.images.length){
+    // إعلان جديد النظام: مصفوفة صور حقيقية من Storage
+    uploadedImages = item.images.map(img=> ({ url: img.url, path: img.path, uploading:false }));
+  } else if(item && item.imageUrl){
+    // توافق عكسي: إعلان قديم بصورة Base64 واحدة، نعرضها كعنصر وحيد بدون path
+    // (path=null يعني ما رح نحاول نحذفها من Storage لأنها أصلاً مخزنة كـ Base64 جوا Firestore)
+    uploadedImages = [{ url: item.imageUrl, path: null, uploading:false }];
   } else {
-    preview.style.display = 'none';
-    selectedImageBase64 = '';
+    uploadedImages = [];
   }
+  renderImgGrid();
+
   document.getElementById('addError').style.display = 'none';
   show('addOverlay');
 }
@@ -1212,10 +1571,19 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
     errEl.style.display = 'block';
     return;
   }
+  if(uploadedImages.some(img=>img.uploading)){
+    errEl.textContent = 'لسا في صور عم تترفع، انتظر شوي';
+    errEl.style.display = 'block';
+    return;
+  }
 
   const btn = document.getElementById('publishBtn');
   btn.disabled = true;
   btn.textContent = editingId ? 'عم نحفظ...' : 'عم ننشر...';
+
+  // مصفوفة الصور الجاهزة للحفظ بـ Firestore (فقط url + path، بدون حالة uploading)
+  const imagesPayload = uploadedImages.map(img=>({ url: img.url, path: img.path || null }));
+  const firstImageUrl = imagesPayload.length ? imagesPayload[0].url : '';
 
   try{
     if(editingId){
@@ -1230,19 +1598,29 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
       }
       await updateDoc(doc(db, 'listings', editingId), {
         title, price: Number(price), category, subcategory, region, condition, brand, desc,
-        imageUrl: selectedImageBase64 || ''
+        images: imagesPayload,
+        imageUrl: firstImageUrl // نحتفظ بهذا الحقل للتوافق مع أي كود قديم يقرأه
       });
       toast('تم حفظ التعديلات ✅');
     } else {
       await addDoc(collection(db, 'listings'), {
         title, price: Number(price), category, subcategory, region, condition, brand, desc,
-        imageUrl: selectedImageBase64 || '',
+        images: imagesPayload,
+        imageUrl: firstImageUrl,
         sellerId: currentUser.uid,
         sellerName: currentUser.displayName || 'مستخدم',
         createdAt: Date.now()
       });
       toast('تم نشر إعلانك ✅');
     }
+
+    // حذف الصور اللي شالها المستخدم فعلياً من Storage (بس بعد ما الحفظ نجح)
+    for(const path of imagesToDeleteOnSave){
+      try{ await deleteObject(ref(storage, path)); }
+      catch(delErr){ console.error('فشل حذف صورة من Storage:', delErr); }
+    }
+    imagesToDeleteOnSave = [];
+
     hide('addOverlay');
     document.getElementById('adTitle').value='';
     document.getElementById('adPrice').value='';
@@ -1250,8 +1628,8 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
     document.getElementById('adDesc').value='';
     document.getElementById('adCategory').value='';
     document.getElementById('adSubcategory').value='';
-    document.getElementById('imgPreview').style.display='none';
-    selectedImageBase64 = '';
+    uploadedImages = [];
+    renderImgGrid();
     editingId = null;
     loadListings();
   }catch(e){
@@ -1275,6 +1653,15 @@ async function deleteListing(id){
   if(!confirm('متأكد بدك تحذف هاد الإعلان؟ ما رح تقدر ترجعه')) return;
   try{
     await deleteDoc(doc(db, 'listings', id));
+    // حذف الصور المرفوعة لهاد الإعلان من Storage (إعلانات قديمة بـ Base64 ما عندها path، نتجاهلها بأمان)
+    if(Array.isArray(item.images)){
+      for(const img of item.images){
+        if(img.path){
+          try{ await deleteObject(ref(storage, img.path)); }
+          catch(delErr){ console.error('فشل حذف صورة من Storage:', delErr); }
+        }
+      }
+    }
     toast('تم حذف الإعلان 🗑️');
     hide('profileOverlay');
     loadListings();
@@ -1600,14 +1987,53 @@ document.addEventListener('click', (e)=>{
 });
 
 // ---------- Load & render listings ----------
+// Offline-first: نخزن آخر قائمة إعلانات بـ localStorage، وقت التحميل نعرضها فوراً
+// (حتى لو في نت، لأنها بتظهر بسرعة وقت ما يفتح المستخدم التطبيق) وبعدين نحدّثها بالنسخة
+// الحقيقية من Firestore بمجرد ما تجهز. هذا بيمنع ظهور صفحة بيضاء/فاضية وقت انقطاع النت.
+const LISTINGS_CACHE_KEY = 'loqta_listings_cache_v1';
+
+function loadCachedListings(){
+  try{
+    const raw = localStorage.getItem(LISTINGS_CACHE_KEY);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed.items) ? parsed.items : null;
+  }catch(e){ return null; }
+}
+
+function saveCachedListings(items){
+  try{
+    // تخزين نسخة مختصرة كافية للعرض فقط (مش كل الحقول)، تقليلاً لحجم localStorage
+    const slim = items.slice(0, 100).map(i=>({
+      id:i.id, title:i.title, price:i.price, region:i.region, condition:i.condition,
+      category:i.category, subcategory:i.subcategory, createdAt:i.createdAt,
+      imageUrl:i.imageUrl, images:i.images, sellerId:i.sellerId, sellerName:i.sellerName,
+      desc:i.desc, brand:i.brand
+    }));
+    localStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify({ items: slim, ts: Date.now() }));
+  }catch(e){ /* لو localStorage ممتلئ أو غير متوفر، نتجاهل بهدوء دون كسر التطبيق */ }
+}
+
 async function loadListings(){
-  document.getElementById('listingsArea').innerHTML = '<div class="loading-spin"></div>';
+  const cached = loadCachedListings();
+  if(cached && cached.length){
+    // نعرض النسخة المخزنة فوراً (مع إشارة بسيطة إنها مخزّنة) لحد ما تجي النسخة الحديثة
+    allListings = cached;
+    renderListings();
+  } else {
+    document.getElementById('listingsArea').innerHTML = '<div class="loading-spin"></div>';
+  }
+
   const timeoutMs = 12000;
   let timedOut = false;
   const timeoutId = setTimeout(()=>{
     timedOut = true;
-    document.getElementById('listingsArea').innerHTML =
-      '<div class="empty"><div class="big">⚠️</div>الاتصال طويل أكتر من العادة<br>تأكد من الإنترنت وجرب تحديث الصفحة</div>';
+    if(!cached || !cached.length){
+      document.getElementById('listingsArea').innerHTML =
+        '<div class="empty"><div class="big">⚠️</div>الاتصال طويل أكتر من العادة<br>تأكد من الإنترنت وجرب تحديث الصفحة</div>';
+    } else {
+      toast('تعذّر تحديث القائمة، بتشوف آخر نسخة محفوظة');
+    }
   }, timeoutMs);
 
   try{
@@ -1617,10 +2043,16 @@ async function loadListings(){
     if(timedOut) return; // المستخدم شاف رسالة المهلة، ما نعيد الكتابة فوقها بهدوء
     allListings = snap.docs.map(d=>({id:d.id, ...d.data()}));
     renderListings();
+    saveCachedListings(allListings);
     checkSavedSearchAlerts();
   }catch(e){
     clearTimeout(timeoutId);
     console.error(e);
+    if(cached && cached.length){
+      // عندنا نسخة محفوظة معروضة أصلاً، نكتفي بتنبيه خفيف بدل ما نمسحها برسالة خطأ
+      toast('ما في اتصال حالياً، بتشوف آخر نسخة محفوظة من الإعلانات');
+      return;
+    }
     const code = e && e.code ? e.code : '';
     let msg = 'صار خطأ بتحميل الإعلانات';
     if(code === 'permission-denied') msg = 'صلاحيات Firestore مرفوضة، راجع Security Rules';
@@ -1854,14 +2286,34 @@ function levenshteinLite(a, b){
 function openDetail(id){
   const item = allListings.find(i=>i.id===id);
   if(!item) return;
-  const img = item.imageUrl
-    ? `<img class="detail-img" src="${item.imageUrl}">`
-    : `<div class="detail-img" style="display:flex;align-items:center;justify-content:center;font-size:50px;">📦</div>`;
+
+  // توافق عكسي: إعلانات جديدة فيها images[]، قديمة فيها imageUrl مفرد فقط
+  const imgs = (Array.isArray(item.images) && item.images.length)
+    ? item.images.map(i=>i.url)
+    : (item.imageUrl ? [item.imageUrl] : []);
+
+  let galleryHtml;
+  if(imgs.length === 0){
+    galleryHtml = `<div class="detail-img" style="display:flex;align-items:center;justify-content:center;font-size:50px;">📦</div>`;
+  } else if(imgs.length === 1){
+    galleryHtml = `<img class="detail-img" src="${imgs[0]}" loading="lazy">`;
+  } else {
+    galleryHtml = `
+      <div class="detail-gallery">
+        <div class="detail-gallery-scroll" id="detailGalleryScroll">
+          ${imgs.map((u,i)=>`<img class="detail-img detail-gallery-img" src="${u}" loading="${i===0?'eager':'lazy'}">`).join('')}
+        </div>
+        <div class="detail-gallery-dots">
+          ${imgs.map((_,i)=>`<span class="dgd${i===0?' active':''}" data-idx="${i}"></span>`).join('')}
+        </div>
+      </div>`;
+  }
+
   const waMsg = encodeURIComponent(`مرحباً، أنا مهتم بـ "${item.title}" المعروضة على لقطة`);
   document.getElementById('detailContent').innerHTML = `
     <button type="button" class="close-x" data-close="detailOverlay">✕</button>
     <div class="sheet-handle"></div>
-    ${img}
+    ${galleryHtml}
     <div class="detail-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
     <div class="detail-title">${escapeHtml(item.title)}</div>
     <div class="detail-meta">
@@ -1882,8 +2334,41 @@ function openDetail(id){
        href="https://wa.me/?text=${waMsg}">
       💬 تواصل عبر واتساب
     </a>
+    ${currentUser
+      ? (item.sellerId !== currentUser.uid ? `
+        <button type="button" class="btn btn-primary" id="startChatBtn" style="margin-top:8px;" data-listing-id="${item.id}">
+          💬 ابدأ محادثة على لقطة
+        </button>` : `<div class="hint" style="text-align:center;margin-top:8px;">هذا إعلانك، ما بتقدر تبدأ محادثة معه</div>`)
+      : `<button type="button" class="btn btn-ghost" id="startChatLoginBtn" style="margin-top:8px;">سجّل دخول لتبدأ محادثة على لقطة</button>`
+    }
   `;
   document.querySelector('#detailOverlay .close-x').addEventListener('click', ()=>hide('detailOverlay'));
+
+  const startChatBtn = document.getElementById('startChatBtn');
+  if(startChatBtn){
+    startChatBtn.addEventListener('click', ()=> openOrCreateChat(item));
+  }
+  const startChatLoginBtn = document.getElementById('startChatLoginBtn');
+  if(startChatLoginBtn){
+    startChatLoginBtn.addEventListener('click', ()=>{ hide('detailOverlay'); show('authOverlay'); });
+  }
+
+  // ربط النقاط بمعرض الصور لو في أكتر من صورة
+  if(imgs.length > 1){
+    const scrollBox = document.getElementById('detailGalleryScroll');
+    const dots = document.querySelectorAll('#detailContent .dgd');
+    scrollBox.addEventListener('scroll', ()=>{
+      const idx = Math.round(scrollBox.scrollLeft / scrollBox.offsetWidth);
+      dots.forEach((d,i)=> d.classList.toggle('active', i===idx));
+    });
+    dots.forEach(dot=>{
+      dot.addEventListener('click', ()=>{
+        const idx = Number(dot.dataset.idx);
+        scrollBox.scrollTo({ left: idx * scrollBox.offsetWidth, behavior:'smooth' });
+      });
+    });
+  }
+
   show('detailOverlay');
 }
 
@@ -1906,6 +2391,8 @@ function openProfile(){
   `;
   document.querySelector('#profileOverlay .close-x').addEventListener('click', ()=>hide('profileOverlay'));
   document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    if(chatsListUnsub){ chatsListUnsub(); chatsListUnsub = null; }
+    if(activeChatUnsub){ activeChatUnsub(); activeChatUnsub = null; }
     await signOut(auth);
     hide('profileOverlay');
     toast('تم تسجيل الخروج');
@@ -1924,6 +2411,174 @@ function openProfile(){
     });
   });
   show('profileOverlay');
+}
+
+// ---------- Chat (دردشة داخلية مرتبطة بالإعلان، على نمط Vinted) ----------
+// كل محادثة = listing + 2 مستخدمين (participants). نخزن نسخة (snapshot) من بيانات
+// الإعلان وقت بدء المحادثة، حتى لو الإعلان تغيّر أو حُذف لاحقاً تبقى المحادثة مفهومة.
+let activeChatId = null;
+let activeChatUnsub = null; // دالة إلغاء الاستماع اللحظي (onSnapshot) للمحادثة المفتوحة حالياً
+let chatsListUnsub = null;  // دالة إلغاء الاستماع اللحظي لقائمة كل المحادثات
+
+function buildChatId(listingId, uidA, uidB){
+  // ترتيب الـ uids أبجدياً لضمان نفس chatId دايماً بغض النظر عن مين بدأ المحادثة
+  const sorted = [uidA, uidB].sort();
+  return `${listingId}_${sorted[0]}_${sorted[1]}`;
+}
+
+async function openOrCreateChat(item){
+  if(!currentUser) return;
+  const chatId = buildChatId(item.id, currentUser.uid, item.sellerId);
+  const chatRef = doc(db, 'chats', chatId);
+
+  try{
+    const snap = await getDoc(chatRef);
+    if(!snap.exists()){
+      // أول رسالة بهاد المحادثة — ننشئ وثيقة المحادثة بنسخة من بيانات الإعلان
+      const imgs = (Array.isArray(item.images) && item.images.length) ? item.images.map(i=>i.url) : (item.imageUrl ? [item.imageUrl] : []);
+      await setDoc(chatRef, {
+        listingId: item.id,
+        listingTitle: item.title,
+        listingImage: imgs[0] || '',
+        listingPrice: Number(item.price) || 0,
+        participants: [currentUser.uid, item.sellerId],
+        lastMessage: '',
+        lastMessageAt: Date.now(),
+        lastMessageSenderId: '',
+        ['unread_'+currentUser.uid]: 0,
+        ['unread_'+item.sellerId]: 0,
+        createdAt: Date.now()
+      });
+    }
+    hide('detailOverlay');
+    openChatRoom(chatId);
+  }catch(e){
+    console.error(e);
+    toast('صار خطأ بفتح المحادثة، جرب مرة تانية');
+  }
+}
+
+function openChatRoom(chatId){
+  activeChatId = chatId;
+  if(activeChatUnsub) activeChatUnsub();
+
+  const chatRef = doc(db, 'chats', chatId);
+  document.getElementById('chatRoomMessages').innerHTML = '<div class="loading-spin"></div>';
+
+  // نقرأ بيانات المحادثة مرة وحدة لتعبية الهيدر (صورة/عنوان الإعلان)، الرسائل نفسها real-time
+  getDoc(chatRef).then(snap=>{
+    if(!snap.exists()) return;
+    const chat = snap.data();
+    document.getElementById('chatRoomThumb').src = chat.listingImage || '';
+    document.getElementById('chatRoomTitle').textContent = chat.listingTitle || '';
+    document.getElementById('chatRoomPrice').textContent = chat.listingPrice ? Number(chat.listingPrice).toLocaleString('en-US')+' ل.س' : '';
+
+    // تصفير عداد غير المقروء الخاص بالمستخدم الحالي بمجرد ما يفتح المحادثة
+    updateDoc(chatRef, { ['unread_'+currentUser.uid]: 0 }).catch(()=>{});
+  });
+
+  const msgsQuery = query(collection(db,'chats',chatId,'messages'), orderBy('createdAt','asc'), limit(200));
+  activeChatUnsub = onSnapshot(msgsQuery, (snap)=>{
+    const container = document.getElementById('chatRoomMessages');
+    if(snap.empty){
+      container.innerHTML = '<div class="chat-empty-hint">ابدأ المحادثة، اسأل عن الإعلان أو حدّد سعرك 👋</div>';
+      return;
+    }
+    container.innerHTML = snap.docs.map(d=>{
+      const m = d.data();
+      const mine = m.senderId === currentUser.uid;
+      const time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'}) : '';
+      return `<div class="msg-bubble ${mine?'mine':'theirs'}">${escapeHtml(m.text)}<span class="msg-time">${time}</span></div>`;
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+  }, (err)=>{
+    console.error(err);
+    toast('انقطع الاتصال بالمحادثة');
+  });
+
+  show('chatRoomOverlay');
+}
+
+document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+document.getElementById('chatMsgInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); sendChatMessage(); }
+});
+
+async function sendChatMessage(){
+  const input = document.getElementById('chatMsgInput');
+  const text = input.value.trim();
+  if(!text || !activeChatId || !currentUser) return;
+  input.value = '';
+
+  try{
+    const chatRef = doc(db, 'chats', activeChatId);
+    const chatSnap = await getDoc(chatRef);
+    if(!chatSnap.exists()) return;
+    const chat = chatSnap.data();
+    const otherUid = chat.participants.find(uid=> uid !== currentUser.uid);
+
+    await addDoc(collection(db,'chats',activeChatId,'messages'), {
+      senderId: currentUser.uid,
+      text,
+      createdAt: Date.now(),
+      read: false
+    });
+    await updateDoc(chatRef, {
+      lastMessage: text,
+      lastMessageAt: Date.now(),
+      lastMessageSenderId: currentUser.uid,
+      ['unread_'+otherUid]: increment(1)
+    });
+  }catch(e){
+    console.error(e);
+    toast('ما انبعتت الرسالة، جرب مرة تانية');
+    input.value = text; // نرجّع النص للمستخدم حتى يقدر يحاول تاني بدون ما يكتبه من جديد
+  }
+}
+
+// ---------- قائمة المحادثات ----------
+function openChatsList(){
+  if(!currentUser){ show('authOverlay'); return; }
+  document.getElementById('chatsListContent').innerHTML = '<div class="loading-spin"></div>';
+  show('chatsListOverlay');
+
+  if(chatsListUnsub) chatsListUnsub();
+  const q = query(collection(db,'chats'), where('participants','array-contains', currentUser.uid));
+  chatsListUnsub = onSnapshot(q, (snap)=>{
+    const chats = snap.docs.map(d=>({id:d.id, ...d.data()}))
+      .filter(c=> c.lastMessage) // نخفي المحادثات اللي لسا بدون أي رسالة فعلية
+      .sort((a,b)=> (b.lastMessageAt||0) - (a.lastMessageAt||0));
+
+    const container = document.getElementById('chatsListContent');
+    if(chats.length === 0){
+      container.innerHTML = '<div class="empty"><div class="big">💬</div>لسا ما عندك محادثات<br>ابدأ محادثة من صفحة أي إعلان</div>';
+      return;
+    }
+    container.innerHTML = chats.map(c=>{
+      const unread = c['unread_'+currentUser.uid] || 0;
+      const thumb = c.listingImage
+        ? `<img class="chat-list-thumb" src="${c.listingImage}">`
+        : `<div class="chat-list-thumb ph">📦</div>`;
+      return `
+        <div class="chat-list-row" data-chat-id="${c.id}">
+          ${thumb}
+          <div class="chat-list-body">
+            <div class="chat-list-title">${escapeHtml(c.listingTitle||'')}</div>
+            <div class="chat-list-last ${unread>0?'unread':''}">${escapeHtml(c.lastMessage||'')}</div>
+          </div>
+          <div class="chat-list-meta">
+            <div class="chat-list-time">${timeAgo(c.lastMessageAt)}</div>
+            ${unread>0 ? `<div class="chat-unread-dot">${unread > 9 ? '9+' : unread}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    container.querySelectorAll('.chat-list-row').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        hide('chatsListOverlay');
+        openChatRoom(row.dataset.chatId);
+      });
+    });
+  }, (err)=> console.error(err));
 }
 
 // ---------- Init ----------
