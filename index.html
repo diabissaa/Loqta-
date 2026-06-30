@@ -314,6 +314,21 @@
     padding:3px 9px;
     border-radius:999px;
   }
+  .fav-btn{
+    position:absolute;
+    top:8px;left:8px;
+    width:30px;height:30px;
+    border-radius:50%;
+    background:rgba(255,255,255,.92);
+    border:none;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;
+    cursor:pointer;
+    z-index:2;
+    box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .fav-btn:active{transform:scale(.88);}
+  .fav-btn.active{color:#e0445b;}
   .card-body{padding:10px 12px 12px;}
   .card-price{
     font-family:'Tajawal',sans-serif;
@@ -608,6 +623,53 @@
   .toast.show{opacity:1;}
 
   /* listing detail */
+  .detail-quick-actions{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .detail-action-btn{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:9px 10px;
+    border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--white);
+    font-family:'Cairo',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .detail-action-btn:active{background:var(--cream);}
+  .dab-icon{font-size:15px;}
+
+  /* ===== Confirm Dialog ===== */
+  #confirmOverlay{align-items:center; z-index:200;}
+  .confirm-sheet{
+    max-width:340px;
+    width:88%;
+    margin:auto;
+    text-align:center;
+    padding:28px 22px 22px;
+    border-radius:20px;
+    animation:popIn .2s ease-out;
+  }
+  @keyframes popIn{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .confirm-icon{font-size:36px;margin-bottom:10px;}
+  .confirm-title{font-family:'Tajawal',sans-serif;font-weight:900;font-size:17px;color:var(--ink);margin-bottom:6px;}
+  .confirm-msg{font-size:13px;color:#8a8175;line-height:1.6;margin-bottom:20px;}
+  .confirm-actions{display:flex;gap:10px;}
+  .confirm-actions .btn{flex:1;margin:0;}
+  .confirm-danger-btn{
+    background:#D64545;
+    color:var(--white);
+    border:none;
+  }
+  .confirm-danger-btn:active{background:#B83838;}
   .detail-img{width:100%;aspect-ratio:1/1;border-radius:16px;object-fit:cover;background:#e8e0d0;margin-bottom:14px;}
 
   .detail-gallery{margin-bottom:14px;}
@@ -860,6 +922,7 @@
 <div class="overlay" id="subcatOverlay">
   <div class="sheet">
     <button type="button" class="close-x" data-close="subcatOverlay">✕</button>
+    <button type="button" id="subcatBackBtn" style="display:none;background:none;border:none;font-size:18px;color:#9a9182;cursor:pointer;position:absolute;top:16px;left:18px;">→</button>
     <div class="sheet-handle"></div>
     <h2 id="subcatTitle">اختار الفئة الفرعية</h2>
     <div id="subcatList"></div>
@@ -925,18 +988,25 @@
     </div>
     <div class="field" id="nameField" style="display:none;">
       <label>اسمك</label>
-      <input type="text" id="authName" placeholder="مثلاً: أبو محمد" autocomplete="off" name="loqta-name-field">
+      <input type="text" id="authName" placeholder="مثلاً: أبو محمد" autocomplete="name" name="name">
     </div>
-    <div class="field">
-      <label>البريد الإلكتروني</label>
-      <input type="email" id="authEmail" placeholder="example@email.com" autocomplete="off" name="loqta-email-field">
+    <div class="field" id="phoneField" style="display:none;">
+      <label>رقم الواتساب</label>
+      <input type="tel" id="authPhone" placeholder="مثلاً: 0991234567" autocomplete="tel" name="tel">
+      <div style="font-size:11px;color:#9a9182;margin-top:4px;">هذا الرقم رح يظهر للمشترين للتواصل معك على إعلاناتك</div>
     </div>
-    <div class="field">
-      <label>كلمة السر</label>
-      <input type="password" id="authPass" placeholder="6 أرقام/حروف أو أكتر" autocomplete="new-password" name="loqta-pass-field">
-    </div>
-    <div class="error-msg" id="authError"></div>
-    <button type="button" class="btn btn-primary" id="authSubmit">دخول</button>
+    <form id="authForm" autocomplete="on">
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="authEmail" placeholder="example@email.com" autocomplete="username" name="username">
+      </div>
+      <div class="field">
+        <label>كلمة السر</label>
+        <input type="password" id="authPass" placeholder="6 أرقام/حروف أو أكتر" autocomplete="current-password" name="password">
+      </div>
+      <div class="error-msg" id="authError"></div>
+      <button type="submit" class="btn btn-primary" id="authSubmit">دخول</button>
+    </form>
     <div id="forgotPassRow" style="text-align:center;margin-top:10px;">
       <button type="button" class="btn-ghost" id="forgotPassBtn" style="background:none;border:none;font-size:13px;cursor:pointer;">نسيت كلمة السر؟</button>
     </div>
@@ -971,7 +1041,7 @@
       <label>صور القطعة <span id="imgCountLabel" style="color:#9a9182;font-weight:400;">(0/8)</span></label>
       <div class="img-grid" id="imgGrid"></div>
       <div class="img-upload" id="imgUploadBox">
-        📷 دوس لإضافة صور (لحد 8 صور)
+        <span id="imgUploadLabel">📷 دوس لإضافة صور (لحد 8 صور)</span>
         <input type="file" accept="image/*" id="imgInput" multiple>
       </div>
     </div>
@@ -994,8 +1064,40 @@
       <input type="text" id="adRegion" placeholder="مثلاً: دمشق - المزة">
     </div>
     <div class="field">
-      <label>الماركة (اختياري)</label>
-      <input type="text" id="adBrand" placeholder="مثلاً: Samsung, Apple, IKEA...">
+      <label>الماركة</label>
+      <select id="adBrand">
+        <option value="">اختار الماركة</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>اللون</label>
+      <select id="adColor">
+        <option value="">اختار اللون</option>
+        <option value="أسود">أسود</option>
+        <option value="أبيض">أبيض</option>
+        <option value="رمادي">رمادي</option>
+        <option value="بيج">بيج</option>
+        <option value="بني">بني</option>
+        <option value="أحمر">أحمر</option>
+        <option value="وردي">وردي</option>
+        <option value="بنفسجي">بنفسجي</option>
+        <option value="أزرق">أزرق</option>
+        <option value="أزرق سماوي">أزرق سماوي</option>
+        <option value="أخضر">أخضر</option>
+        <option value="أصفر">أصفر</option>
+        <option value="برتقالي">برتقالي</option>
+        <option value="بيج فاتح">بيج فاتح</option>
+        <option value="ذهبي">ذهبي</option>
+        <option value="فضي">فضي</option>
+        <option value="متعدد الألوان">متعدد الألوان</option>
+        <option value="ألوان أخرى">ألوان أخرى</option>
+      </select>
+    </div>
+    <div class="field" id="sizeField" style="display:none;">
+      <label id="sizeFieldLabel">القياس</label>
+      <select id="adSize">
+        <option value="">اختار القياس</option>
+      </select>
     </div>
     <div class="field">
       <label>حالة القطعة</label>
@@ -1035,6 +1137,29 @@
   </div>
 </div>
 
+<!-- ===== Favorites Sheet ===== -->
+<div class="overlay" id="favoritesOverlay">
+  <div class="sheet">
+    <button type="button" class="close-x" data-close="favoritesOverlay">✕</button>
+    <div class="sheet-handle"></div>
+    <h2>المفضلة ❤️</h2>
+    <div id="favoritesContent"></div>
+  </div>
+</div>
+
+<!-- ===== Confirm Dialog (عام، قابل لإعادة الاستخدام) ===== -->
+<div class="overlay" id="confirmOverlay">
+  <div class="sheet confirm-sheet">
+    <div class="confirm-icon" id="confirmIcon">🗑️</div>
+    <div class="confirm-title" id="confirmTitle">متأكد من الحذف؟</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-actions">
+      <button type="button" class="btn btn-ghost" id="confirmCancelBtn">إلغاء</button>
+      <button type="button" class="btn confirm-danger-btn" id="confirmOkBtn">حذف</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== Chat Room Sheet ===== -->
 <div class="overlay chat-room-overlay" id="chatRoomOverlay">
   <div class="sheet">
@@ -1066,7 +1191,7 @@ import {
 import {
   getFirestore, collection, addDoc, getDocs, query, orderBy,
   doc, getDoc, updateDoc, deleteDoc, serverTimestamp,
-  onSnapshot, where, limit, setDoc, increment
+  onSnapshot, where, limit, setDoc, increment, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
   getStorage, ref, uploadBytes, getDownloadURL, deleteObject
@@ -1090,6 +1215,7 @@ const MAX_IMAGES = 8; // أقصى عدد صور لكل إعلان
 
 let currentUser = null;
 let allListings = [];
+let favoriteIds = new Set(); // معرّفات الإعلانات المفضّلة للمستخدم الحالي، محمّلة من Firestore وقت تسجيل الدخول
 let activeCategory = "الكل";
 let activeSubcategory = null; // null يعني كل الفئة الرئيسية بدون تحديد فرع
 
@@ -1102,14 +1228,82 @@ let filterState = {
   brands: [] // فاضية = كل الماركات
 };
 
+// ملاحظة: "ملابس" و"أحذية" لهم منطق شجرة خاص بهم (CLOTHING_TREE / SHOES_TREE بمستوى نوع)،
+// فما عندهم إشارة هون بـ CATEGORY_TREE — تفاديًا لتضارب أو ازدواجية بمصدرين مختلفين لنفس الفئة.
 const CATEGORY_TREE = {
-  "ملابس": ["ملابس رجالي", "ملابس نسائي", "ملابس أطفال", "أحذية", "حقائب", "إكسسوارات"],
   "موبايلات": ["موبايلات", "أجهزة لوحية (تابلت)", "ساعات ذكية", "إكسسوارات موبايل", "سماعات"],
   "أجهزة": ["أجهزة كهربائية منزلية", "أجهزة مطبخ", "كمبيوتر ولابتوب", "تلفزيونات وشاشات", "أجهزة صوت"],
   "أثاث": ["غرف نوم", "صالونات وكنب", "طاولات وكراسي", "مطابخ", "ديكور ومفروشات"],
   "سيارات": ["سيارات للبيع", "قطع غيار", "إكسسوارات سيارات", "دراجات نارية"],
   "أخرى": []
 };
+
+// ---------- ماركات حسب الفئة الرئيسية ----------
+// حقل الماركة إلزامي لكل الفئات، فلازم قائمة مناسبة لكل فئة + خيار "ماركة أخرى" دايماً بالنهاية.
+const BRANDS_BY_CATEGORY = {
+  "ملابس": ["Zara", "H&M", "Mango", "Bershka", "Pull & Bear", "LC Waikiki", "Adidas", "Nike", "Puma", "بدون ماركة محددة", "ماركة أخرى"],
+  "أحذية": ["Nike", "Adidas", "Puma", "Skechers", "New Balance", "Converse", "Vans", "بدون ماركة محددة", "ماركة أخرى"],
+  "موبايلات": ["Samsung", "Apple", "Huawei", "Xiaomi", "Oppo", "Vivo", "Nokia", "ماركة أخرى"],
+  "أجهزة": ["Samsung", "LG", "Bosch", "Sony", "Philips", "Tornado", "Universal", "ماركة أخرى"],
+  "أثاث": ["IKEA", "بدون ماركة محددة", "ماركة أخرى"],
+  "سيارات": ["Toyota", "Hyundai", "Kia", "Honda", "Nissan", "Mercedes", "BMW", "Volkswagen", "ماركة أخرى"],
+  "أخرى": ["بدون ماركة محددة", "ماركة أخرى"]
+};
+
+// ---------- قياسات/أعمار حسب النوع (نسائي/رجالي/أطفال) والفئة (ملابس/أحذية) ----------
+const SIZE_OPTIONS = {
+  "ملابس_نسائي": ["XS", "S", "M", "L", "XL", "XXL", "مقاس حر"],
+  "ملابس_رجالي": ["S", "M", "L", "XL", "XXL", "XXXL", "مقاس حر"],
+  // أعمار الأطفال كنطاقات سنوية، من 0 لحد 16 سنة حسب طلبك
+  "ملابس_أطفال": ["0-6 شهور", "6-12 شهر", "1-2 سنة", "2-4 سنوات", "4-6 سنوات", "6-8 سنوات", "8-10 سنوات", "10-12 سنة", "12-14 سنة", "14-16 سنة"],
+  // مقاسات الأحذية رقمية: أطفال لحد 38، رجالي/نسائي من 39 فوق (حسب طلبك)
+  "أحذية_نسائي": ["39", "40", "41", "42", "43", "44", "45", "46"],
+  "أحذية_رجالي": ["39", "40", "41", "42", "43", "44", "45", "46"],
+  "أحذية_أطفال": Array.from({length: 21}, (_, i) => String(18 + i)) // 18 لحد 38
+};
+
+function populateBrandSelect(mainCategory){
+  const sel = document.getElementById('adBrand');
+  const current = sel.value;
+  const list = BRANDS_BY_CATEGORY[mainCategory] || BRANDS_BY_CATEGORY["أخرى"];
+  sel.innerHTML = '<option value="">اختار الماركة</option>' +
+    list.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+  // لو القيمة القديمة لسا موجودة بالقائمة الجديدة (مثلاً وضع تعديل)، نحافظ عليها
+  if(list.includes(current)) sel.value = current;
+}
+
+// نحدّث حقل القياس بناءً على الفئة الرئيسية (ملابس/أحذية) والنوع المختار بالـ subcategory
+// (اللي مخزّن بصيغة "نوع ‹ تفصيل"، مثلاً "نسائي ‹ جينز سكيني")
+function updateSizeField(){
+  const category = document.getElementById('adCategory').value;
+  const subcategory = document.getElementById('adSubcategory').value;
+  const sizeField = document.getElementById('sizeField');
+  const sizeLabel = document.getElementById('sizeFieldLabel');
+  const sizeSelect = document.getElementById('adSize');
+
+  if(category !== 'ملابس' && category !== 'أحذية'){
+    sizeField.style.display = 'none';
+    sizeSelect.value = '';
+    return;
+  }
+
+  // نستخرج النوع (نسائي/رجالي/أطفال) من أول جزء بقيمة subcategory
+  const type = (subcategory.split('‹')[0] || '').trim();
+  const key = `${category}_${type}`;
+  const options = SIZE_OPTIONS[key];
+
+  if(!options){
+    // المستخدم اختار "كل ملابس" أو "كل أحذية" بدون تحديد نوع — ما نعرف أي قياس نعرض له
+    sizeField.style.display = 'none';
+    sizeSelect.value = '';
+    return;
+  }
+
+  sizeLabel.textContent = (category === 'ملابس' && type === 'أطفال') ? 'العمر' : 'القياس';
+  sizeSelect.innerHTML = `<option value="">اختار ${sizeLabel.textContent}</option>` +
+    options.map(o=>`<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
+  sizeField.style.display = 'block';
+}
 
 // ---------- Helpers ----------
 function show(id){ document.getElementById(id).classList.add('show'); }
@@ -1124,7 +1318,17 @@ document.querySelectorAll('[data-close]').forEach(btn=>{
   btn.addEventListener('click', ()=> hide(btn.dataset.close));
 });
 document.querySelectorAll('.overlay').forEach(ov=>{
-  ov.addEventListener('click', (e)=>{ if(e.target===ov) ov.classList.remove('show'); });
+  ov.addEventListener('click', (e)=>{
+    if(e.target===ov){
+      ov.classList.remove('show');
+      // نافذة التأكيد خاصة: لو انسكرت بالضغط على الخلفية (مش زر إلغاء/تأكيد)،
+      // لازم نحلّ الـ Promise المعلّقة بـ false، وإلا أي كود واقف على await showConfirm(...) بيعلق للأبد
+      if(ov.id === 'confirmOverlay' && confirmResolver){
+        confirmResolver(false);
+        confirmResolver = null;
+      }
+    }
+  });
 });
 
 function timeAgo(ts){
@@ -1160,7 +1364,7 @@ document.querySelectorAll('.bottom-nav-item').forEach(item=>{
       item.classList.add('active');
       window.scrollTo({top:0, behavior:'smooth'});
     } else if(nav === 'favorites'){
-      toast('هاد القسم قريباً إن شاء الله 🚧');
+      openFavorites();
     }
     // add و profile و messages معرّفين بدالتهم الخاصة فوق
   });
@@ -1171,6 +1375,7 @@ document.getElementById('tabLogin').addEventListener('click', (e)=>{
   document.getElementById('tabLogin').classList.add('active');
   document.getElementById('tabSignup').classList.remove('active');
   document.getElementById('nameField').style.display = 'none';
+  document.getElementById('phoneField').style.display = 'none';
   document.getElementById('authTitle').textContent = 'تسجيل الدخول';
   document.getElementById('authSubmit').textContent = 'دخول';
   document.getElementById('forgotPassRow').style.display = 'block';
@@ -1181,16 +1386,18 @@ document.getElementById('tabSignup').addEventListener('click', (e)=>{
   document.getElementById('tabSignup').classList.add('active');
   document.getElementById('tabLogin').classList.remove('active');
   document.getElementById('nameField').style.display = 'block';
+  document.getElementById('phoneField').style.display = 'block';
   document.getElementById('authTitle').textContent = 'حساب جديد';
   document.getElementById('authSubmit').textContent = 'إنشاء الحساب';
   document.getElementById('forgotPassRow').style.display = 'none';
 });
 
-document.getElementById('authSubmit').addEventListener('click', async (e)=>{
+document.getElementById('authForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const email = document.getElementById('authEmail').value.trim();
   const pass = document.getElementById('authPass').value;
   const name = document.getElementById('authName').value.trim();
+  const phoneRaw = document.getElementById('authPhone').value.trim();
   const errEl = document.getElementById('authError');
   errEl.style.display = 'none';
   const debugMode = authMode;
@@ -1210,11 +1417,31 @@ document.getElementById('authSubmit').addEventListener('click', async (e)=>{
         submitBtn.disabled = false;
         return;
       }
+      // تحقق مبسّط من رقم الهاتف: لازم أرقام بس (مع إمكانية + بالأول)، طول معقول (7-15 رقم)
+      const phoneDigits = phoneRaw.replace(/[^\d+]/g,'');
+      if(!phoneRaw || !/^\+?\d{7,15}$/.test(phoneDigits)){
+        errEl.textContent = 'عبي رقم واتساب صحيح (أرقام فقط، مثلاً 0991234567)';
+        errEl.style.display = 'block';
+        submitBtn.disabled = false;
+        return;
+      }
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       try{
         await updateProfile(cred.user, { displayName: name });
       }catch(profileErr){
         console.error(profileErr);
+      }
+      try{
+        // نخزن رقم الهاتف بوثيقة مستقلة (users/{uid}) لأنه Firebase Auth profile
+        // ما بيدعم حقول مخصصة. هذا الرقم رح يُقرأ وقت نشر أي إعلان جديد لاحقاً.
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          phone: phoneDigits,
+          name,
+          email,
+          createdAt: serverTimestamp()
+        });
+      }catch(userDocErr){
+        console.error(userDocErr);
       }
       toast('تم إنشاء حسابك ✅');
     } else {
@@ -1225,6 +1452,7 @@ document.getElementById('authSubmit').addEventListener('click', async (e)=>{
     document.getElementById('authEmail').value='';
     document.getElementById('authPass').value='';
     document.getElementById('authName').value='';
+    document.getElementById('authPhone').value='';
   }catch(e){
     errEl.textContent = friendlyAuthError(e.code);
     errEl.style.display = 'block';
@@ -1288,7 +1516,7 @@ document.getElementById('resetSubmit').addEventListener('click', async ()=>{
   }
 });
 
-onAuthStateChanged(auth, (user)=>{
+onAuthStateChanged(auth, async (user)=>{
   currentUser = user;
   const heroBtn = document.getElementById('profileBtnHero');
   const bottomBtn = document.getElementById('bottomProfileBtn');
@@ -1296,11 +1524,22 @@ onAuthStateChanged(auth, (user)=>{
     heroBtn.textContent = '✅';
     heroBtn.title = user.displayName || user.email;
     bottomBtn.querySelector('.bn-icon').textContent = '✅';
+    // نحمّل قائمة المفضلة الخاصة بهاد المستخدم (مخزّنة كمصفوفة معرّفات داخل users/{uid})
+    try{
+      const userSnap = await getDoc(doc(db, 'users', user.uid));
+      const ids = (userSnap.exists() && Array.isArray(userSnap.data().favoriteIds)) ? userSnap.data().favoriteIds : [];
+      favoriteIds = new Set(ids);
+    }catch(e){
+      console.error(e);
+      favoriteIds = new Set();
+    }
   } else {
     heroBtn.textContent = '👤';
     heroBtn.title = 'حسابي';
     bottomBtn.querySelector('.bn-icon').textContent = '👤';
+    favoriteIds = new Set(); // تسجيل خروج = ننسى المفضلة المحلية، رح تُحمّل من جديد عند أي تسجيل دخول
   }
+  renderListings(); // نعيد رسم الكروت حتى تظهر حالة القلب (ممتلئ/فاضي) صحيحة فوراً
 });
 
 // ---------- Image upload (compressed, ثم رفع حقيقي لـ Firebase Storage) ----------
@@ -1377,11 +1616,14 @@ function renderImgGrid(){
 
 function updateImgUploadBoxState(){
   const box = document.getElementById('imgUploadBox');
+  const label = document.getElementById('imgUploadLabel');
   const full = uploadedImages.length >= MAX_IMAGES;
   box.classList.toggle('disabled', full);
-  box.childNodes[0] && (box.firstChild.textContent = full
-    ? '📷 وصلت للحد الأقصى (8 صور)'
-    : '📷 دوس لإضافة صور (لحد 8 صور)');
+  if(label){
+    label.textContent = full
+      ? '📷 وصلت للحد الأقصى (8 صور)'
+      : '📷 دوس لإضافة صور (لحد 8 صور)';
+  }
 }
 
 document.getElementById('imgInput').addEventListener('change', async (e)=>{
@@ -1450,6 +1692,8 @@ function openAddSheet(item){
   updateCatBtnLabel();
   document.getElementById('adRegion').value = item ? item.region : '';
   document.getElementById('adBrand').value = item ? (item.brand || '') : '';
+  document.getElementById('adColor').value = item ? (item.color || '') : '';
+  document.getElementById('adSize').value = item ? (item.size || '') : '';
   document.getElementById('adCondition').value = item ? (item.condition || 'مستعمل') : 'مستعمل';
   document.getElementById('adDesc').value = item ? (item.desc||'') : '';
 
@@ -1481,29 +1725,72 @@ function updateCatBtnLabel(){
     btn.textContent = sub ? `${cat} ‹ ${sub}` : cat;
     btn.classList.add('filled');
   }
+  // كل مرة تتغيّر الفئة (أو الفئة الفرعية)، لازم نحدّث قائمة الماركات المناسبة وحقل القياس/العمر
+  populateBrandSelect(cat);
+  updateSizeField();
 }
 
 // ---------- Category picker (drill-down: رئيسية ثم فرعية) ----------
-const MAIN_CATEGORIES = ["ملابس", "موبايلات", "أجهزة", "أثاث", "سيارات", "أخرى"];
+const MAIN_CATEGORIES = ["ملابس", "أحذية", "موبايلات", "أجهزة", "أثاث", "سيارات", "أخرى"];
+
+// شجرة الملابس موسّعة لـ 3 مستويات (نوع ← قسم ← فئة دقيقة)، باقي الفئات لسا بمستوى واحد.
+// كل قيمة نهائية بـ CLOTHING_TREE تُخزّن بحقل subcategory بصيغة "نوع ‹ فئة دقيقة"
+// (مثلاً "نسائي ‹ جينز سكيني")، حتى ما نغيّر بنية البيانات بـ Firestore أو أي كود يقرأها.
+// "ملابس" و"أحذية" فئتان رئيسيتان مستقلتان بالكامل، وكل واحدة فيها نفس مستوى النوع
+// (نسائي/رجالي/أطفال) ثم الفئة الدقيقة مباشرة — بدون مستوى وسيط "ملابس/أحذية" تحت النوع.
+const CLOTHING_TREE = {
+  "نسائي": ["فساتين", "بلوزات وتيشيرتات", "جينز", "بناطيل وليجنز", "تنانير", "جاكيتات ومعاطف", "سويتشرتات وهوديز", "بدلات رسمية", "شورتات", "ملابس داخلية وبيجامات", "ملابس رياضية", "ملابس سباحة", "ملابس حوامل"],
+  "رجالي": ["قمصان", "تيشيرتات", "جينز", "بناطيل", "جاكيتات ومعاطف", "سويتشرتات وهوديز", "بدلات رسمية", "شورتات", "ملابس داخلية", "ملابس رياضية", "ملابس سباحة"],
+  "أطفال": ["ملابس بنات", "ملابس صبيان", "ملابس مواليد", "بيجامات", "ملابس مدرسية", "ملابس مناسبات"]
+};
+
+const SHOES_TREE = {
+  "نسائي": ["كوتشيات", "صنادل وشحاطات", "كعب عالي", "بوت", "شو فلات", "أحذية رياضية"],
+  "رجالي": ["كوتشيات", "صنادل وشحاطات", "بوت", "أحذية كلاسيك", "أحذية رياضية"],
+  "أطفال": ["كوتشيات أطفال", "صنادل أطفال", "بوت أطفال"]
+};
 
 document.getElementById('adCategoryBtn').addEventListener('click', ()=>{
+  subcatNavStack = []; // نصفّر المسار كل مرة نفتح الشجرة من جديد، حتى ما يتراكم من فتحة سابقة
   openSubcatPicker('main');
 });
+document.getElementById('subcatBackBtn').addEventListener('click', subcatGoBack);
 
-function openSubcatPicker(level, mainCat){
+// ---------- Navigation state للـ subcat picker (عشان زر الرجوع يشتغل صحيح) ----------
+let subcatNavStack = []; // كل عنصر: { level, args } — نخزن المسار اللي مشيناه حتى نقدر نرجع خطوة بخطوة
+
+function openSubcatPicker(level, ...args){
+  subcatNavStack.push({level, args});
+  renderSubcatLevel(level, ...args);
+}
+
+function subcatGoBack(){
+  subcatNavStack.pop(); // نشيل المستوى الحالي
+  const prev = subcatNavStack.pop(); // ونرجع للي قبله
+  if(!prev){ hide('subcatOverlay'); return; }
+  openSubcatPicker(prev.level, ...prev.args);
+}
+
+function renderSubcatLevel(level, ...args){
+  const [mainCat, clothingType, sectionName] = args;
   const titleEl = document.getElementById('subcatTitle');
   const listEl = document.getElementById('subcatList');
+  const backBtn = document.getElementById('subcatBackBtn');
   listEl.innerHTML = '';
+  backBtn.style.display = subcatNavStack.length > 1 ? 'block' : 'none';
 
   if(level === 'main'){
     titleEl.textContent = 'اختار الفئة الرئيسية';
     MAIN_CATEGORIES.forEach(cat=>{
-      const hasSubs = (CATEGORY_TREE[cat] || []).length > 0;
+      const isTyped = cat === 'ملابس' || cat === 'أحذية'; // الفئتين اللي عندهم مستوى نوع (نسائي/رجالي/أطفال)
+      const hasSubs = isTyped || (CATEGORY_TREE[cat] || []).length > 0;
       const row = document.createElement('div');
       row.className = 'subcat-row';
       row.innerHTML = `<span>${escapeHtml(cat)}</span>${hasSubs ? '<span class="arrow">‹</span>' : ''}`;
       row.addEventListener('click', ()=>{
-        if(hasSubs){
+        if(isTyped){
+          openSubcatPicker('typed-category', cat);
+        } else if(hasSubs){
           openSubcatPicker('sub', cat);
         } else {
           document.getElementById('adCategory').value = cat;
@@ -1514,9 +1801,59 @@ function openSubcatPicker(level, mainCat){
       });
       listEl.appendChild(row);
     });
-  } else {
+  } else if(level === 'typed-category'){
+    // مستوى النوع: نسائي / رجالي / أطفال — مشترك بين "ملابس" و"أحذية"، كل واحدة بشجرتها الخاصة
+    const mainCategory = mainCat; // 'ملابس' أو 'أحذية'
+    const tree = mainCategory === 'ملابس' ? CLOTHING_TREE : SHOES_TREE;
+    titleEl.textContent = `${mainCategory} — اختار النوع`;
+    const allRow = document.createElement('div');
+    allRow.className = 'subcat-row';
+    allRow.innerHTML = `<span>كل ${escapeHtml(mainCategory)}</span>`;
+    allRow.addEventListener('click', ()=>{
+      document.getElementById('adCategory').value = mainCategory;
+      document.getElementById('adSubcategory').value = '';
+      updateCatBtnLabel();
+      hide('subcatOverlay');
+    });
+    listEl.appendChild(allRow);
+
+    Object.keys(tree).forEach(type=>{
+      const row = document.createElement('div');
+      row.className = 'subcat-row';
+      row.innerHTML = `<span>${escapeHtml(type)}</span><span class="arrow">‹</span>`;
+      row.addEventListener('click', ()=> openSubcatPicker('typed-detail', mainCategory, type));
+      listEl.appendChild(row);
+    });
+  } else if(level === 'typed-detail'){
+    // المستوى الأخير: الفئة الدقيقة (مثل "جينز سكيني" أو "كوتشيات")، نخزنها مدمجة مع النوع
+    const mainCategory = mainCat;
+    const tree = mainCategory === 'ملابس' ? CLOTHING_TREE : SHOES_TREE;
+    titleEl.textContent = `${mainCategory} ‹ ${clothingType}`;
+    const allRow = document.createElement('div');
+    allRow.className = 'subcat-row';
+    allRow.innerHTML = `<span>كل ${escapeHtml(clothingType)}</span>`;
+    allRow.addEventListener('click', ()=>{
+      document.getElementById('adCategory').value = mainCategory;
+      document.getElementById('adSubcategory').value = clothingType;
+      updateCatBtnLabel();
+      hide('subcatOverlay');
+    });
+    listEl.appendChild(allRow);
+
+    (tree[clothingType] || []).forEach(detail=>{
+      const row = document.createElement('div');
+      row.className = 'subcat-row';
+      row.innerHTML = `<span>${escapeHtml(detail)}</span>`;
+      row.addEventListener('click', ()=>{
+        document.getElementById('adCategory').value = mainCategory;
+        document.getElementById('adSubcategory').value = `${clothingType} ‹ ${detail}`;
+        updateCatBtnLabel();
+        hide('subcatOverlay');
+      });
+      listEl.appendChild(row);
+    });
+  } else if(level === 'sub'){
     titleEl.textContent = mainCat;
-    // خيار "كل " + الفئة الرئيسية، بدون فرع محدد
     const allRow = document.createElement('div');
     allRow.className = 'subcat-row';
     allRow.innerHTML = `<span>كل ${escapeHtml(mainCat)}</span>`;
@@ -1556,7 +1893,9 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
   const subcategory = document.getElementById('adSubcategory').value;
   const region = document.getElementById('adRegion').value.trim();
   const condition = document.getElementById('adCondition').value;
-  const brand = document.getElementById('adBrand').value.trim();
+  const brand = document.getElementById('adBrand').value;
+  const color = document.getElementById('adColor').value;
+  const size = document.getElementById('adSize').value;
   const desc = document.getElementById('adDesc').value.trim();
   const errEl = document.getElementById('addError');
   errEl.style.display = 'none';
@@ -1566,8 +1905,31 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
     errEl.style.display = 'block';
     return;
   }
+  const priceNum = Number(price);
+  if(!Number.isFinite(priceNum) || priceNum <= 0){
+    errEl.textContent = 'السعر لازم يكون رقم صحيح أكبر من صفر';
+    errEl.style.display = 'block';
+    return;
+  }
   if(!category){
     errEl.textContent = 'لازم تختار فئة للإعلان';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(!brand){
+    errEl.textContent = 'لازم تختار الماركة';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(!color){
+    errEl.textContent = 'لازم تختار اللون';
+    errEl.style.display = 'block';
+    return;
+  }
+  // القياس/العمر إلزامي بس لما يكون حقله ظاهر فعلياً (يعني الفئة ملابس/أحذية ومحدد فيها نوع واضح)
+  if(document.getElementById('sizeField').style.display !== 'none' && !size){
+    const label = document.getElementById('sizeFieldLabel').textContent;
+    errEl.textContent = `لازم تحدد ${label}`;
     errEl.style.display = 'block';
     return;
   }
@@ -1597,19 +1959,28 @@ document.getElementById('publishBtn').addEventListener('click', async ()=>{
         return;
       }
       await updateDoc(doc(db, 'listings', editingId), {
-        title, price: Number(price), category, subcategory, region, condition, brand, desc,
+        title, price: priceNum, category, subcategory, region, condition, brand, color, size, desc,
         images: imagesPayload,
         imageUrl: firstImageUrl // نحتفظ بهذا الحقل للتوافق مع أي كود قديم يقرأه
       });
       toast('تم حفظ التعديلات ✅');
     } else {
+      // نقرأ رقم هاتف البائع من وثيقة users/{uid} (محفوظ وقت التسجيل) وننسخه (snapshot)
+      // داخل الإعلان نفسه، حتى لو البائع غيّر رقمه لاحقاً يبقى رقم هذا الإعلان كما نُشر
+      let sellerPhone = '';
+      try{
+        const userSnap = await getDoc(doc(db, 'users', currentUser.uid));
+        if(userSnap.exists()) sellerPhone = userSnap.data().phone || '';
+      }catch(phoneErr){ console.error(phoneErr); }
+
       await addDoc(collection(db, 'listings'), {
-        title, price: Number(price), category, subcategory, region, condition, brand, desc,
+        title, price: priceNum, category, subcategory, region, condition, brand, color, size, desc,
         images: imagesPayload,
         imageUrl: firstImageUrl,
         sellerId: currentUser.uid,
         sellerName: currentUser.displayName || 'مستخدم',
-        createdAt: Date.now()
+        sellerPhone,
+        createdAt: serverTimestamp()
       });
       toast('تم نشر إعلانك ✅');
     }
@@ -1650,7 +2021,13 @@ async function deleteListing(id){
     toast('ما عندك صلاحية تحذف هاد الإعلان');
     return;
   }
-  if(!confirm('متأكد بدك تحذف هاد الإعلان؟ ما رح تقدر ترجعه')) return;
+  const confirmed = await showConfirm({
+    icon: '🗑️',
+    title: 'متأكد بدك تحذف هاد الإعلان؟',
+    message: 'ما رح تقدر ترجعه بعد الحذف',
+    okLabel: 'حذف نهائي'
+  });
+  if(!confirmed) return;
   try{
     await deleteDoc(doc(db, 'listings', id));
     // حذف الصور المرفوعة لهاد الإعلان من Storage (إعلانات قديمة بـ Base64 ما عندها path، نتجاهلها بأمان)
@@ -1670,6 +2047,28 @@ async function deleteListing(id){
     console.error(e);
   }
 }
+
+// ---------- نافذة تأكيد عامة (بديل احترافي عن confirm() الافتراضي بالمتصفح) ----------
+// تُستخدم كـ: const ok = await showConfirm({title, message, okLabel}); if(ok) { ... }
+let confirmResolver = null;
+
+function showConfirm({icon='⚠️', title='متأكد؟', message='', okLabel='تأكيد'} = {}){
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = message;
+  document.getElementById('confirmOkBtn').textContent = okLabel;
+  show('confirmOverlay');
+  return new Promise(resolve=>{ confirmResolver = resolve; });
+}
+
+document.getElementById('confirmOkBtn').addEventListener('click', ()=>{
+  hide('confirmOverlay');
+  if(confirmResolver){ confirmResolver(true); confirmResolver = null; }
+});
+document.getElementById('confirmCancelBtn').addEventListener('click', ()=>{
+  hide('confirmOverlay');
+  if(confirmResolver){ confirmResolver(false); confirmResolver = null; }
+});
 
 // ---------- Filters ----------
 document.getElementById('filterChips').addEventListener('click', (e)=>{
@@ -1700,7 +2099,10 @@ document.getElementById('catCircles').addEventListener('click', (e)=>{
 
 function renderSubcatBar(){
   const bar = document.getElementById('subcatBar');
-  const subs = CATEGORY_TREE[activeCategory] || [];
+  // فئتا "ملابس" و"أحذية" عندهم مستوى نوع (نسائي/رجالي/أطفال) بدل قائمة بسيطة، فلتر البحث
+  // هون بيعرض النوع فقط (بدون التفاصيل الدقيقة اللي محصورة بنموذج النشر)
+  const isTyped = (activeCategory === 'ملابس' || activeCategory === 'أحذية');
+  const subs = isTyped ? Object.keys(activeCategory === 'ملابس' ? CLOTHING_TREE : SHOES_TREE) : (CATEGORY_TREE[activeCategory] || []);
   if(activeCategory === 'الكل' || subs.length === 0){
     bar.style.display = 'none';
     bar.innerHTML = '';
@@ -2041,7 +2443,14 @@ async function loadListings(){
     const snap = await getDocs(q);
     clearTimeout(timeoutId);
     if(timedOut) return; // المستخدم شاف رسالة المهلة، ما نعيد الكتابة فوقها بهدوء
-    allListings = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    allListings = snap.docs.map(d=>{
+      const data = d.data();
+      // serverTimestamp() بترجع Firestore Timestamp object (فيه .toMillis())، مش رقم عادي.
+      // نحوّلها هون لـ number مرة واحدة، حتى يبقى باقي الكود (sort, timeAgo...) يشتغل بدون تعديل.
+      const createdAtMs = data.createdAt && typeof data.createdAt.toMillis === 'function'
+        ? data.createdAt.toMillis() : (data.createdAt || 0);
+      return {id:d.id, ...data, createdAt: createdAtMs};
+    });
     renderListings();
     saveCachedListings(allListings);
     checkSavedSearchAlerts();
@@ -2157,7 +2566,12 @@ function renderListings(){
     items = items.filter(i=>i.category === activeCategory);
   }
   if(activeSubcategory){
-    items = items.filter(i=>i.subcategory === activeSubcategory);
+    // فئتا الملابس والأحذية: subcategory المخزّن دايماً فيه تفصيل دقيق ("نسائي ‹ جينز سكيني")، فلتر البحث
+    // البسيط (نسائي/رجالي/أطفال) لازم يطابق أي إعلان يبلش بنفس النوع، مش مطابقة حرفية تامة.
+    // باقي الفئات (موبايلات، أثاث...) لسا بمستوى واحد فمطابقة تامة كافية ومضمونة.
+    items = (activeCategory === 'ملابس' || activeCategory === 'أحذية')
+      ? items.filter(i => (i.subcategory||'').startsWith(activeSubcategory))
+      : items.filter(i => i.subcategory === activeSubcategory);
   }
   if(term){
     items = items.filter(i=>{
@@ -2210,6 +2624,12 @@ function renderListings(){
   document.querySelectorAll('.card').forEach(c=>{
     c.addEventListener('click', ()=> openDetail(c.dataset.id));
   });
+  document.querySelectorAll('.fav-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation(); // حتى ما يفتح تفاصيل الإعلان بالخطأ لما يدوس على القلب
+      toggleFavorite(btn.dataset.favId, btn);
+    });
+  });
 }
 
 function cardHtml(item){
@@ -2218,10 +2638,12 @@ function cardHtml(item){
     : `<div class="ph">📦</div>`;
   const badge = (item.condition === 'جديد' || item.condition === 'شبه جديد')
     ? `<div class="card-badge">${escapeHtml(item.condition)}</div>` : '';
+  const isFav = favoriteIds.has(item.id);
   return `
     <div class="card" data-id="${item.id}">
       ${img}
       ${badge}
+      <button type="button" class="fav-btn ${isFav?'active':''}" data-fav-id="${item.id}">${isFav?'❤️':'🤍'}</button>
       <div class="card-body">
         <div class="card-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
         <div class="card-title">${escapeHtml(item.title)}</div>
@@ -2240,7 +2662,7 @@ function myCardHtml(item){
       <div class="card-body">
         <div class="card-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
         <div class="card-title">${escapeHtml(item.title)}</div>
-        <div class="card-meta">📍 ${escapeHtml(item.region||'')}</div>
+        <div class="card-meta">📍 ${escapeHtml(item.region||'')} · 👁️ ${item.views || 0}</div>
         <div class="my-card-actions">
           <button type="button" class="mini-btn edit-btn" data-id="${item.id}">✏️ تعديل</button>
           <button type="button" class="mini-btn del-btn" data-id="${item.id}">🗑️ حذف</button>
@@ -2253,6 +2675,94 @@ function escapeHtml(s){
   const div = document.createElement('div');
   div.textContent = s || '';
   return div.innerHTML;
+}
+
+// ---------- عداد المشاهدات 👁️ ----------
+// نمنع تضخّم العداد بشكل غير واقعي (نفس الزائر يفتح ويسكر الإعلان عشرات المرات) عبر
+// تخزين قائمة "شفتها قبل" بـ localStorage، ونزيد العداد فعلياً مرة وحدة بس كل 24 ساعة لكل إعلان.
+// ملاحظة مهمة: هاد المنطق محلي (client-side) بطبيعته، فمحترف يقدر نظرياً يتجاوزه (يمسح localStorage
+// ويزور بسرعة)، تماماً مثل أغلب عدّادات المشاهدات بمواقع التسوق الإلكتروني المماثلة — دقة تقريبية، مش رقم حسابي دقيق 100%.
+const VIEWS_SEEN_KEY = 'loqta_viewed_listings_v1';
+const VIEW_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 ساعة
+
+function registerView(item){
+  // البائع نفسه ما بيزيد عداد مشاهداته لما يفتح إعلانه (منطقي، وإلا العداد بيصير مضلّل)
+  if(currentUser && item.sellerId === currentUser.uid) return;
+
+  let seenMap = {};
+  try{ seenMap = JSON.parse(localStorage.getItem(VIEWS_SEEN_KEY) || '{}'); }catch(e){ seenMap = {}; }
+
+  const lastSeen = seenMap[item.id] || 0;
+  if(Date.now() - lastSeen < VIEW_COOLDOWN_MS) return; // شافه قبل خلال آخر 24 ساعة، ما منزيد
+
+  seenMap[item.id] = Date.now();
+  try{ localStorage.setItem(VIEWS_SEEN_KEY, JSON.stringify(seenMap)); }catch(e){ /* localStorage ممتلئ أو غير متوفر، نتجاهل بهدوء */ }
+
+  // نحدّث العدد محلياً فوراً (حتى يظهر بصفحة التفاصيل المفتوحة هلق بدون انتظار)
+  item.views = (item.views || 0) + 1;
+
+  // ونحدّث Firestore بالخلفية بدون انتظار، increment آمن من تضارب التحديثات المتزامنة من زوار مختلفين
+  updateDoc(doc(db, 'listings', item.id), { views: increment(1) }).catch(e=>{
+    console.error('فشل تحديث عداد المشاهدات:', e);
+  });
+}
+
+// ---------- المفضلة ❤️ ----------
+function openFavorites(){
+  if(!currentUser){ show('authOverlay'); return; }
+  const container = document.getElementById('favoritesContent');
+  const favItems = allListings.filter(i=> favoriteIds.has(i.id));
+
+  if(favItems.length === 0){
+    container.innerHTML = '<div class="empty"><div class="big">🤍</div>لسا ما ضفت إعلانات للمفضلة<br>دوس على القلب بأي إعلان لتضيفه هون</div>';
+  } else {
+    container.innerHTML = `<div class="grid">${favItems.map(cardHtml).join('')}</div>`;
+    container.querySelectorAll('.card').forEach(c=>{
+      c.addEventListener('click', ()=>{ hide('favoritesOverlay'); openDetail(c.dataset.id); });
+    });
+    container.querySelectorAll('.fav-btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleFavorite(btn.dataset.favId, btn);
+        // بعد ثانية بسيطة نعيد رسم اللستة حتى يختفي الإعلان اللي شيله المستخدم من المفضلة
+        setTimeout(()=> openFavorites(), 250);
+      });
+    });
+  }
+  show('favoritesOverlay');
+}
+
+async function toggleFavorite(id, btnEl){
+  if(!currentUser){
+    toast('لازم تسجل دخول أول لتضيف للمفضلة');
+    show('authOverlay');
+    return;
+  }
+  const wasFav = favoriteIds.has(id);
+  // تحديث متفائل (optimistic): نغيّر شكل القلب فوراً بدون انتظار Firestore، حتى يحس المستخدم
+  // بسرعة استجابة فورية. لو فشل التحديث بالخلفية، نرجّع الحالة القديمة ونعرض رسالة خطأ.
+  if(wasFav){ favoriteIds.delete(id); } else { favoriteIds.add(id); }
+  if(btnEl){
+    btnEl.textContent = wasFav ? '🤍' : '❤️';
+    btnEl.classList.toggle('active', !wasFav);
+  }
+  try{
+    const userRef = doc(db, 'users', currentUser.uid);
+    // setDoc مع merge:true بدل updateDoc، لأنه بعض الحسابات القديمة (قبل إضافة users collection)
+    // ما عندها وثيقة users أصلاً، وupdateDoc بيفشل على وثيقة غير موجودة
+    await setDoc(userRef, {
+      favoriteIds: wasFav ? arrayRemove(id) : arrayUnion(id)
+    }, { merge: true });
+  }catch(e){
+    console.error(e);
+    // فشل التحديث — نرجّع الحالة القديمة بهدوء
+    if(wasFav){ favoriteIds.add(id); } else { favoriteIds.delete(id); }
+    if(btnEl){
+      btnEl.textContent = wasFav ? '❤️' : '🤍';
+      btnEl.classList.toggle('active', wasFav);
+    }
+    toast('صار خطأ، جرب مرة تانية');
+  }
 }
 
 // ---------- بحث تقريبي خفيف (يتسامح مع خطأ إملائي واحد أو حرفين) ----------
@@ -2287,6 +2797,8 @@ function openDetail(id){
   const item = allListings.find(i=>i.id===id);
   if(!item) return;
 
+  registerView(item); // نزيد عداد المشاهدات (بحد أقصى مرة كل 24 ساعة لكل زائر لكل إعلان)
+
   // توافق عكسي: إعلانات جديدة فيها images[]، قديمة فيها imageUrl مفرد فقط
   const imgs = (Array.isArray(item.images) && item.images.length)
     ? item.images.map(i=>i.url)
@@ -2310,9 +2822,23 @@ function openDetail(id){
   }
 
   const waMsg = encodeURIComponent(`مرحباً، أنا مهتم بـ "${item.title}" المعروضة على لقطة`);
+  // الإعلانات المنشورة قبل إضافة حقل sellerPhone ما عندها رقم محفوظ — نتعامل معها بلطف
+  // بإخفاء زر واتساب بدل ما نعرضه برابط مكسور بدون رقم فعلي
+  const cleanPhone = (item.sellerPhone || '').replace(/^0/, '963').replace(/[^\d]/g,'');
+  const waHref = cleanPhone ? `https://wa.me/${cleanPhone}?text=${waMsg}` : null;
+  const isFav = favoriteIds.has(item.id);
+
   document.getElementById('detailContent').innerHTML = `
     <button type="button" class="close-x" data-close="detailOverlay">✕</button>
     <div class="sheet-handle"></div>
+    <div class="detail-quick-actions">
+      <button type="button" class="detail-action-btn" id="detailFavBtn" data-fav-id="${item.id}">
+        <span class="dab-icon">${isFav?'❤️':'🤍'}</span><span class="dab-label">${isFav?'بالمفضلة':'أضف للمفضلة'}</span>
+      </button>
+      <button type="button" class="detail-action-btn" id="detailShareBtn">
+        <span class="dab-icon">🔗</span><span class="dab-label">مشاركة</span>
+      </button>
+    </div>
     ${galleryHtml}
     <div class="detail-price">${Number(item.price).toLocaleString('en-US')} ل.س</div>
     <div class="detail-title">${escapeHtml(item.title)}</div>
@@ -2320,7 +2846,11 @@ function openDetail(id){
       <span class="badge">📍 ${escapeHtml(item.region||'')}</span>
       <span class="badge">${escapeHtml(item.category||'')}${item.subcategory ? ' ‹ '+escapeHtml(item.subcategory) : ''}</span>
       ${item.condition ? `<span class="badge">${escapeHtml(item.condition)}</span>` : ''}
+      ${item.brand ? `<span class="badge">🏷️ ${escapeHtml(item.brand)}</span>` : ''}
+      ${item.color ? `<span class="badge">🎨 ${escapeHtml(item.color)}</span>` : ''}
+      ${item.size ? `<span class="badge">📏 ${escapeHtml(item.size)}</span>` : ''}
       <span class="badge">${timeAgo(item.createdAt)}</span>
+      ${item.views ? `<span class="badge">👁️ ${item.views} مشاهدة</span>` : ''}
     </div>
     ${item.desc ? `<p style="line-height:1.6;color:#555;">${escapeHtml(item.desc)}</p>` : ''}
     <div class="seller-row">
@@ -2330,10 +2860,10 @@ function openDetail(id){
         <div style="font-size:12px;color:#9a9182;">البائع</div>
       </div>
     </div>
-    <a class="btn whatsapp-btn" style="text-decoration:none;" target="_blank"
-       href="https://wa.me/?text=${waMsg}">
+    ${waHref ? `
+    <a class="btn whatsapp-btn" style="text-decoration:none;" target="_blank" href="${waHref}">
       💬 تواصل عبر واتساب
-    </a>
+    </a>` : ''}
     ${currentUser
       ? (item.sellerId !== currentUser.uid ? `
         <button type="button" class="btn btn-primary" id="startChatBtn" style="margin-top:8px;" data-listing-id="${item.id}">
@@ -2343,6 +2873,35 @@ function openDetail(id){
     }
   `;
   document.querySelector('#detailOverlay .close-x').addEventListener('click', ()=>hide('detailOverlay'));
+
+  document.getElementById('detailFavBtn').addEventListener('click', (e)=>{
+    toggleFavorite(item.id, null); // null لأنه هاد الزر شكله مختلف عن قلب الكرت، منحدّثه يدوياً تحت
+    const stillFav = favoriteIds.has(item.id);
+    const btn = e.currentTarget;
+    btn.querySelector('.dab-icon').textContent = stillFav ? '❤️' : '🤍';
+    btn.querySelector('.dab-label').textContent = stillFav ? 'بالمفضلة' : 'أضف للمفضلة';
+  });
+
+  document.getElementById('detailShareBtn').addEventListener('click', async ()=>{
+    const shareUrl = `${location.origin}${location.pathname}#listing-${item.id}`;
+    const shareData = {
+      title: item.title,
+      text: `شوف هاد الإعلان على لقطة: ${item.title} - ${Number(item.price).toLocaleString('en-US')} ل.س`,
+      url: shareUrl
+    };
+    // نستخدم Web Share API لو متوفرة (أغلب متصفحات الموبايل الحديثة)، وإلا ننسخ الرابط كحل بديل
+    if(navigator.share){
+      try{ await navigator.share(shareData); }
+      catch(err){ /* المستخدم سكّر نافذة المشاركة بنفسه، ما في خطأ حقيقي هون */ }
+    } else {
+      try{
+        await navigator.clipboard.writeText(shareUrl);
+        toast('تم نسخ رابط الإعلان 📋');
+      }catch(err){
+        toast('ما قدرنا ننسخ الرابط، جرب تنسخه يدوياً من شريط العنوان');
+      }
+    }
+  });
 
   const startChatBtn = document.getElementById('startChatBtn');
   if(startChatBtn){
